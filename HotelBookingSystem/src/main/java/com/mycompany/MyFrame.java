@@ -6,12 +6,14 @@ package com.mycompany;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -55,7 +57,7 @@ public class MyFrame extends JFrame{
      
     //initializes frame
     private void init() {
-        setSize(640,400);
+        setSize(740,500);
         setLocationRelativeTo(null);
         setTitle("Hotel Booking System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -204,48 +206,73 @@ public class MyFrame extends JFrame{
         
         
         
-        
+        //TabbedPane has tabPanel1 (manage bookings), tabPanel2 (manage guests), tabPanel3(manage rooms)
         JTabbedPane menuComponents = new JTabbedPane();
         JPanel tabPanel1 = new JPanel();
         tabPanel1.setLayout(new BorderLayout());
         //tabPanel1.setLayout(new GridLayout(1, 2));
         //Buttons for manage bookings menu
+        
         JPanel leftPanel1 = new JPanel();
         leftPanel1.setLayout(new BorderLayout());
         
         JPanel leftPanel1btnTOP = new JPanel();
-        leftPanel1btnTOP.setLayout(new GridLayout(5,1));
-        JPanel leftPanel1btnBOTTOM = new JPanel();
-        leftPanel1btnBOTTOM.setLayout(new GridLayout(3,1));
+        leftPanel1btnTOP.setLayout(new GridLayout(3,2));
+        JPanel leftPanel1btnCENTER = new JPanel();
+        leftPanel1btnCENTER.setLayout(new GridBagLayout());
         
         //Adding Top and Bottom Panels into left split panel
         leftPanel1.add(leftPanel1btnTOP, BorderLayout.NORTH);
+        leftPanel1.add(leftPanel1btnCENTER, BorderLayout.CENTER);
 
-        leftPanel1.add(leftPanel1btnBOTTOM, BorderLayout.SOUTH);
         
         //Adding buttons to left splitpane, North border
         JLabel northBtnTitle = new JLabel("Filter Booking List:");
-        JButton viewAllBtn = new JButton("All Bookings");
-        JButton viewCurrentBtn = new JButton("Active Bookings");
-        JButton viewPendingBtn = new JButton("Pending Bookings"); //Bookings that are to be checked in
-        JButton viewOldBtn = new JButton("Historical Bookings");
+        String[] strFilterOptions = new String[]{ "All Bookings", "Active Bookings", "Pending Bookings", "Historical Bookings"};
+        JComboBox<String> filterOptions = new JComboBox<String>(strFilterOptions);
+        
         leftPanel1btnTOP.add(northBtnTitle);
-        leftPanel1btnTOP.add(viewAllBtn);
-        leftPanel1btnTOP.add(viewCurrentBtn);
-        leftPanel1btnTOP.add(viewPendingBtn);
-        leftPanel1btnTOP.add(viewOldBtn);
+        leftPanel1btnTOP.add(filterOptions);
         
         //Adding buttons to left splitpane, South border
-        JButton checkInBtn = new JButton("Check In");
+        JButton makeBookingbtn = new JButton("Create Booking");
+        makeBookingbtn.addActionListener(new ActionListener() {          
+            @Override
+            public void actionPerformed(ActionEvent e) {  
+                GridBagConstraints gbc = new GridBagConstraints();
+                JLabel label1 = new JLabel("Enter Booking Details");
+                JLabel guestNameLabel = new JLabel("Guest Name: ");
+                JTextField guestNametxf = new JTextField(10);
+                JLabel numLabel = new JLabel("Phone Number: ");
+                JTextField numTxf = new JTextField(10);
+                JButton addBtn = new JButton("Submit");
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.gridx = 0; gbc.gridy = 0; gbc.gridheight = 1; gbc.gridwidth = 1; 
+                leftPanel1btnCENTER.add(label1, gbc);
+                gbc.gridx = 0; gbc.gridy = 1; gbc.gridheight = 1; gbc.gridwidth = 1;
+                leftPanel1btnCENTER.add(guestNameLabel, gbc);
+                gbc.gridx = 1; gbc.gridy = 1; gbc.gridheight = 1; gbc.gridwidth = 1;
+                leftPanel1btnCENTER.add(guestNametxf,gbc);
+                gbc.gridx = 0; gbc.gridy = 2; gbc.gridheight = 1; gbc.gridwidth = 1;
+                leftPanel1btnCENTER.add(numLabel, gbc);
+                gbc.gridx = 1; gbc.gridy = 2; gbc.gridheight = 1; gbc.gridwidth = 1;
+                leftPanel1btnCENTER.add(numTxf, gbc);
+                gbc.gridx = 1; gbc.gridy = 3; gbc.gridheight = 1; gbc.gridwidth = 1;
+                leftPanel1btnCENTER.add(addBtn, gbc);
+                loadMenuPanel();
+            }
+        });
+        JButton checkInBtn = new JButton("Check In");       
         JButton checkOutBtn = new JButton("Check Out");
         JButton cancelBtn = new JButton("Cancel Booking");
-        leftPanel1btnBOTTOM.add(checkInBtn);
-        leftPanel1btnBOTTOM.add(checkOutBtn);
-        leftPanel1btnBOTTOM.add(cancelBtn);
-        
+        leftPanel1btnTOP.add(makeBookingbtn);
+        leftPanel1btnTOP.add(checkInBtn);
+        leftPanel1btnTOP.add(checkOutBtn);
+        leftPanel1btnTOP.add(cancelBtn);
+               
         
         String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
-        String[] tableHeadings = new String[] {"A", "B", "C"};
+        String[] tableHeadings = new String[] {"Booking ID", "Guest", "Room Number"};
         JTable bookingsTable = new JTable(myStrList, tableHeadings){ 
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
@@ -253,9 +280,11 @@ public class MyFrame extends JFrame{
         };
         
         //Adding Table to scrollPane
-        JScrollPane sp = new JScrollPane(bookingsTable);
-        
-        JSplitPane tabPanel1Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel1, sp);
+        JScrollPane sp1 = new JScrollPane(leftPanel1);
+        JScrollPane sp2 = new JScrollPane(bookingsTable);        
+        JSplitPane tabPanel1Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
+        //Where the splitpane is located along the middle of two panes
+        tabPanel1Inner.setResizeWeight(.5d); 
         tabPanel1.add(tabPanel1Inner, BorderLayout.CENTER);
         
         
