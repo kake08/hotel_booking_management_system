@@ -39,6 +39,8 @@ public class MyFrame extends JFrame{
     JPanel startPanel;
     JPanel menuPanel;
     CardLayout cards;
+    JPanel leftPanel1btnCENTER;
+    CardLayout bookingFormCards;
     Integer bookingMode; //1:MANAGE BOOKING 2:MANAGE GUEST 3:MANAGE ROOMS
     String strLoginMode;
     
@@ -49,12 +51,14 @@ public class MyFrame extends JFrame{
         init();
         loadLogin();
         loadMenuPanel();
+        loadBookingForms();
         
         cards.show(mainPanel, "STARTPANEL");
         this.add(mainPanel);
         setVisible(true);
         
     }
+   
      
     //initializes frame -- need to encapsulate? init - main, startup  atc.  - different functions
     private void init() {
@@ -68,6 +72,7 @@ public class MyFrame extends JFrame{
         mainPanel.setBorder(new TitledBorder("MAIN PANEL"));
         cards = new CardLayout();
         mainPanel.setLayout(cards);
+        bookingFormCards = new CardLayout();
         bookingMode = -1; 
         
         //Start Up Panel
@@ -236,6 +241,37 @@ public class MyFrame extends JFrame{
         
     }
     
+    private void loadBookingForms() {
+        JPanel clearForm = new JPanel();
+        leftPanel1btnCENTER.add(clearForm, "CLEARFORM");
+        
+        JPanel createForm = new JPanel();
+        createForm.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        JLabel label1 = new JLabel("Enter Booking Details");
+        JLabel guestNameLabel = new JLabel("Guest Name: ");
+        JTextField guestNametxf = new JTextField(10);
+        JLabel numLabel = new JLabel("Phone Number: ");
+        JTextField numTxf = new JTextField(10);
+        JButton addBtn = new JButton("Submit");
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridheight = 1; gbc.gridwidth = 1; 
+        createForm.add(label1, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridheight = 1; gbc.gridwidth = 1;
+        createForm.add(guestNameLabel, gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.gridheight = 1; gbc.gridwidth = 1;
+        createForm.add(guestNametxf,gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridheight = 1; gbc.gridwidth = 1;
+        createForm.add(numLabel, gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.gridheight = 1; gbc.gridwidth = 1;
+        createForm.add(numTxf, gbc);
+        gbc.gridx = 1; gbc.gridy = 3; gbc.gridheight = 1; gbc.gridwidth = 1;                    
+        createForm.add(addBtn, gbc);
+
+        leftPanel1btnCENTER.add(createForm, "CREATEFORM");
+        bookingFormCards.show(leftPanel1btnCENTER, "CLEARFORM");
+    }
     
     private void loadManageBookingsPanel(JPanel tabPanel1) {
         
@@ -247,13 +283,14 @@ public class MyFrame extends JFrame{
         
         JPanel leftPanel1btnTOP = new JPanel();
         leftPanel1btnTOP.setLayout(new GridLayout(3,2));
-        JPanel leftPanel1btnCENTER = new JPanel();
-        leftPanel1btnCENTER.setLayout(new GridBagLayout());
+        leftPanel1btnCENTER = new JPanel();
+        leftPanel1btnCENTER.setLayout(bookingFormCards);
+        
         
         //Adding Top and Bottom Panels into left split panel
         leftPanel1.add(leftPanel1btnTOP, BorderLayout.NORTH);
         leftPanel1.add(leftPanel1btnCENTER, BorderLayout.CENTER);
-
+        loadBookingForms();
         
         //Adding buttons to left splitpane, North border
         JLabel northBtnTitle = new JLabel("Filter Booking List:");
@@ -263,35 +300,18 @@ public class MyFrame extends JFrame{
         leftPanel1btnTOP.add(northBtnTitle);
         leftPanel1btnTOP.add(filterOptions);
         
-        //Adding buttons to left splitpane, South border
+        //Adding buttons to left splitpane, CENTRAL border
         JButton makeBookingbtn = new JButton("Create Booking");
         makeBookingbtn.addActionListener(new ActionListener() {          
             @Override
             public void actionPerformed(ActionEvent e) {  
-                if (bookingMode != 1) {
-                    bookingMode = 1;
-                    GridBagConstraints gbc = new GridBagConstraints();
-                    JLabel label1 = new JLabel("Enter Booking Details");
-                    JLabel guestNameLabel = new JLabel("Guest Name: ");
-                    JTextField guestNametxf = new JTextField(10);
-                    JLabel numLabel = new JLabel("Phone Number: ");
-                    JTextField numTxf = new JTextField(10);
-                    JButton addBtn = new JButton("Submit");
-                    gbc.anchor = GridBagConstraints.WEST;
-                    gbc.gridx = 0; gbc.gridy = 0; gbc.gridheight = 1; gbc.gridwidth = 1; 
-                    leftPanel1btnCENTER.add(label1, gbc);
-                    gbc.gridx = 0; gbc.gridy = 1; gbc.gridheight = 1; gbc.gridwidth = 1;
-                    leftPanel1btnCENTER.add(guestNameLabel, gbc);
-                    gbc.gridx = 1; gbc.gridy = 1; gbc.gridheight = 1; gbc.gridwidth = 1;
-                    leftPanel1btnCENTER.add(guestNametxf,gbc);
-                    gbc.gridx = 0; gbc.gridy = 2; gbc.gridheight = 1; gbc.gridwidth = 1;
-                    leftPanel1btnCENTER.add(numLabel, gbc);
-                    gbc.gridx = 1; gbc.gridy = 2; gbc.gridheight = 1; gbc.gridwidth = 1;
-                    leftPanel1btnCENTER.add(numTxf, gbc);
-                    gbc.gridx = 1; gbc.gridy = 3; gbc.gridheight = 1; gbc.gridwidth = 1;
-                    leftPanel1btnCENTER.add(addBtn, gbc);
-                    loadMenuPanel();
+                if (bookingMode == 1) {
+                    bookingFormCards.show(leftPanel1btnCENTER, "CLEARFORM");
+                    bookingMode = -1;
+                    return;
                 }
+                bookingFormCards.show(leftPanel1btnCENTER, "CREATEFORM");
+                bookingMode = 1;
             }
         });
         JButton checkInBtn = new JButton("Check In");       
