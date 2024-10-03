@@ -12,6 +12,9 @@ package com.mycompany;
 public class HotelBookingSystem {
     
     public static void main(String[] args) {
-        MyFrame myFrame = new MyFrame();
+        View myFrame = new View();
+        Model model = new Model();
+        Controller controller = new Controller(myFrame, model);
+        model.setListener(myFrame);
     }
 }
