@@ -37,7 +37,8 @@ public class View extends JFrame implements ModelListener{
     JPanel mainPanel;
     JPanel loginPanel;
     JPanel startPanel;
-    JPanel menuPanel;
+    JPanel staffMenuPanel;
+    JPanel guestMenuPanel;
     CardLayout cards;
     JPanel leftPanel1btnCENTER; //Manage bookings forms
     JPanel leftPanel2btnCENTER; //Manage guest forms
@@ -46,12 +47,30 @@ public class View extends JFrame implements ModelListener{
     String strLoginMode;
     
     
+    //Buttons
+    JButton continueButton;
+    JButton loginButton;
+    
+    //Labels
+    JLabel loginMessage;
+    
+    //Textbox or Typing fields
+    JTextField username;
+    JPasswordField password ;
+    
+    
+    //Combobox
+    JComboBox<String> userComboBox;
+    
     //Constructor
     public View() {
 
         init();
         loadLogin();
-        loadMenuPanel();
+
+        //should only load on staff login
+        loadStaffMenuPanel();
+        loadGuestMenuPanel();
         loadBookingForms();
         
         
@@ -62,7 +81,8 @@ public class View extends JFrame implements ModelListener{
     }
     
     public void addActionListener(ActionListener listener) {
-        //button.addActionListener
+        this.continueButton.addActionListener(listener);
+        this.loginButton.addActionListener(listener);
     }
    
      
@@ -103,33 +123,33 @@ public class View extends JFrame implements ModelListener{
         gbc.gridwidth = 1;
         gbc.gridheight = 2;
         String[] comboOptions = new String[] {"Login as Guest", "Login as Staff"};
-        JComboBox<String> userComboBox = new JComboBox<String>(comboOptions);
+        userComboBox = new JComboBox<String>(comboOptions);
         userOptionComponents.add(userComboBox, gbc);
         
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
-        JButton button1 = new JButton("Continue");
-        button1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (userComboBox.getSelectedItem().equals("Login as Guest"))
-                {
-                    menuPanel.setBorder(new TitledBorder("Guest Menu"));
-                    loginPanel.setBorder(new TitledBorder("Guest Login"));
-                }
-                    
-                else
-                {
-                    menuPanel.setBorder(new TitledBorder("Staff Menu"));
-                    loginPanel.setBorder(new TitledBorder("Staff Login"));
-                }
-                    
-                cards.show(mainPanel, "LOGINPANEL");
-            }            
-        });
-        userOptionComponents.add(button1, gbc);
+        continueButton = new JButton("Continue");
+//        continueButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                if (userComboBox.getSelectedItem().equals("Login as Guest"))
+//                {
+//                    menuPanel.setBorder(new TitledBorder("Guest Menu"));
+//                    loginPanel.setBorder(new TitledBorder("Guest Login"));
+//                }
+//                    
+//                else
+//                {
+//                    menuPanel.setBorder(new TitledBorder("Staff Menu"));
+//                    loginPanel.setBorder(new TitledBorder("Staff Login"));
+//                }
+//                    
+//                cards.show(mainPanel, "LOGINPANEL");
+//            }            
+//        });
+        userOptionComponents.add(continueButton, gbc);
         
         startPanel.add(userOptionComponents, BorderLayout.CENTER);
         mainPanel.add(startPanel, "STARTPANEL");
@@ -150,35 +170,35 @@ public class View extends JFrame implements ModelListener{
         GridBagConstraints gbc = new GridBagConstraints();
         
         gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
-        JLabel labelUser = new JLabel("Username: ");
+        JLabel labelUser = new JLabel("Username:    ");
         loginComponents.add(labelUser, gbc);
         
         gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 1;
-        JTextField text1 = new JTextField(10);
-        loginComponents.add(text1, gbc);
-        
-        gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
-        JLabel labelPW = new JLabel("Password: ");
-        loginComponents.add(labelPW, gbc);
-        
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 1;
-        JPasswordField password = new JPasswordField(10);
-        loginComponents.add(password, gbc);
+        username = new JTextField(10);
+        loginComponents.add(username, gbc);
         
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        JLabel labelPW = new JLabel("Password:     ");
+        loginComponents.add(labelPW, gbc);
+        
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        password = new JPasswordField(10);
+        loginComponents.add(password, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
         JButton button2 = new JButton("Return");
@@ -191,28 +211,61 @@ public class View extends JFrame implements ModelListener{
         loginComponents.add(button2, gbc);
         
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
-        JButton button1 = new JButton("Log In");       
-        button1.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cards.show(mainPanel, "MENUPANEL");
-            }            
-        });
-        loginComponents.add(button1, gbc);
+        loginButton = new JButton("Log In");       
+//        loginButton.addActionListener(new ActionListener(){
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                cards.show(mainPanel, "MENUPANEL");
+//            }            
+//        });
+        loginComponents.add(loginButton, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        loginMessage = new JLabel("                 ");
+        loginComponents.add(loginMessage, gbc);
         
         
         loginPanel.add(loginComponents, BorderLayout.CENTER);
         mainPanel.add(loginPanel, "LOGINPANEL");
     }
     
+    private void loadGuestMenuPanel() {
+        guestMenuPanel = new JPanel();
+        guestMenuPanel.setLayout(new BorderLayout());
+        
+        //TabbedPanes
+        JTabbedPane menuComponents = new JTabbedPane();
+        //My bookings overview and My requests
+        JPanel tabPanel1 = new JPanel();
+        JPanel tabPanel2 = new JPanel();
+        
+        menuComponents.add("My Bookings", tabPanel1);
+        menuComponents.add("My Requests", tabPanel2);
+        
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cards.show(mainPanel, "LOGINPANEL");
+            }
+        });
+        
+        bottomPanel.add(btnLogout);
+        guestMenuPanel.add(bottomPanel, BorderLayout.SOUTH);
+        guestMenuPanel.add(menuComponents, BorderLayout.CENTER);
+        mainPanel.add(guestMenuPanel, "GUESTMENUPANEL");
+    }
     
-    
-    private void loadMenuPanel() {
-        menuPanel = new JPanel();
-        menuPanel.setLayout(new BorderLayout());   
+    private void loadStaffMenuPanel() {
+        staffMenuPanel = new JPanel();
+        staffMenuPanel.setLayout(new BorderLayout());   
                
         //TabbedPane has tabPanel1, tabPanel2, tabPanel3
         JTabbedPane menuComponents = new JTabbedPane();
@@ -241,9 +294,9 @@ public class View extends JFrame implements ModelListener{
         });
         bottomPanel.add(btnLogout);
         
-        menuPanel.add(bottomPanel, BorderLayout.SOUTH);
-        menuPanel.add(menuComponents, BorderLayout.CENTER);
-        mainPanel.add(menuPanel, "MENUPANEL");
+        staffMenuPanel.add(bottomPanel, BorderLayout.SOUTH);
+        staffMenuPanel.add(menuComponents, BorderLayout.CENTER);
+        mainPanel.add(staffMenuPanel, "STAFFMENUPANEL");
         
     }
     
@@ -555,11 +608,53 @@ public class View extends JFrame implements ModelListener{
     
     private void loadManageRooms(JPanel tabPanel3) {
         tabPanel3.setLayout(new BorderLayout());
+        
+        //Panel for Left side of Manage Rooms for menu
+        JPanel leftPanel3 = new JPanel();
+        leftPanel3.setLayout(new BorderLayout());
+        
+        JPanel leftPanel3btnTOP = new JPanel();
+        leftPanel3btnTOP.setLayout(new GridLayout(3,2));
     }
 
     @Override
     public void onModelUpdate(Data data) {
-        //TODO
-        System.out.println("TODO: On Model Update");
+        if(!data.loginFlag) {
+            this.username.setText("");
+            this.password.setText("");
+            this.loginMessage.setText("Invalid username or password. Try Again.");
+        } else {
+            this.username.setText("");
+            this.password.setText("");
+            this.loginMessage.setText("");
+            if (data.userMode == 0) //guest
+            {
+                cards.show(mainPanel, "GUESTMENUPANEL");
+            }
+            else if (data.userMode == 1) { //staff
+                cards.show(mainPanel, "STAFFMENUPANEL");
+            }
+        }
+        
+//        setUserMode(data.userMode);
+        
+        
     }
+    
+    public void setUserMode(int userMode) {
+        if (userMode == 0) { //guest
+            guestMenuPanel.setBorder(new TitledBorder("Guest Menu"));
+            loginPanel.setBorder(new TitledBorder("Guest Login"));
+            this.loginMessage.setText("");
+        }
+        else if (userMode == 1) {
+             staffMenuPanel.setBorder(new TitledBorder("Staff Menu"));
+             loginPanel.setBorder(new TitledBorder("Staff Login"));
+             this.loginMessage.setText("");
+        }
+        cards.show(mainPanel, "LOGINPANEL");
+    }
+    
 }
+
+

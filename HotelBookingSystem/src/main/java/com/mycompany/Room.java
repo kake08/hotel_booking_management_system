@@ -8,9 +8,6 @@ package com.mycompany;
  *
  * @author DeanK
  */
-public class Data { //collective for different data collections?
-    //A data structure for bookings e.g. arraylists
-    boolean loginFlag = false;
-    int userMode = -1; //-1 neither, 0 for guest, 1 for staff
+public class Room {
     
 }

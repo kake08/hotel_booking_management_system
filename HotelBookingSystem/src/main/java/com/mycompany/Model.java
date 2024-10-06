@@ -11,6 +11,7 @@ package com.mycompany;
 public class Model {
     public Database db;
     public Data data;
+//    public String currentUser; //should this be User class?
     //public Data array list of data?
     //public String username //current username
     
@@ -18,12 +19,34 @@ public class Model {
     
     public Model() {
         this.db = new Database();
-        this.db.dbsetup(); //why not just call setup when instantiating Database
+        this.db.establishConnection(); //why not just call setup when instantiating Database
+        data = new Data();
     }
     
     public void setListener(ModelListener listener) {
         this.listener = listener;
     }
+    
+    public void checkStaffLogin(String username, String password) {
+//        this.username = username;
+        data.loginFlag = this.db.checkStaffLogin(username, password);
+        
+        notifyListener(); //listener is view - update view
+    }
+    
+    public void checkGuestLogin(String username, String password) {
+        data.loginFlag = this.db.checkGuestLogin(username, password);
+        notifyListener();
+    }
+    
+    public void setUserMode(int usermode) {
+        this.data.userMode = usermode;
+    }
+    public int getUserMode() {
+        return this.data.userMode;
+    }
+    
+
     
     //Notifying the listener(view) when data is updated
     private void notifyListener() {
