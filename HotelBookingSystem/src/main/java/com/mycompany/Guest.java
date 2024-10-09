@@ -14,10 +14,17 @@ public class Guest{
     ArrayList<Booking> myBookings = new ArrayList<>(); //bookingID
     private static int guestCount; //Used for new guests' ID
     
+    String guestName;
+    String guestPhone; 
+    
     
     //Not sure if i should have guest be an extension of user still.
+    
+    
     public Guest(String name, String value) {
         //super(guestCount, name, value); //- used for when Guest extends User 
+        guestName = name;
+        guestPhone = value;
         
     }
     

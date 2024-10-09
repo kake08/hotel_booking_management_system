@@ -20,6 +20,9 @@ public class Controller implements ActionListener {
         this.view = view;
         this.model = model;
         this.view.addActionListener(this);
+        //make sure the view table model is assigned TO THE model table model
+        model.data.tableModel = view.tableModel;
+//        model.data = view.data;
     }
     
     //TODO
@@ -33,6 +36,7 @@ public class Controller implements ActionListener {
                 System.out.println(action + " clicked!");
                 if(this.model.data.userMode == 1) {
                     this.model.checkStaffLogin(username, password);
+                    model.fetchBookings();
                 }
                 else if (this.model.data.userMode == 0) {
                     this.model.checkGuestLogin(username, password);
@@ -43,13 +47,26 @@ public class Controller implements ActionListener {
                 String userMode = (String) this.view.userComboBox.getSelectedItem();
                 if ("Login as Guest".equals(userMode)) {
                     this.model.setUserMode(0);
+                    view.labelPW.setText("Phone Number: ");
                     System.out.println("Set Usermode as Guest = 0");
                 } else if ("Login as Staff".equals(userMode)) {
                     this.model.setUserMode(1);
+                    view.labelPW.setText("Password: ");
                     System.out.println("Set User mode as Staff = 1");
                 }
                 view.setUserMode(this.model.getUserMode());
                 break;
+            case "Logout":     
+                System.out.println("Logged Out...Still userMode" + this.model.getUserMode());
+                model.setLoggedOut();
+                view.setUserMode(this.model.getUserMode());
+                break;
+            case "Create Booking":
+                System.out.println("Creating new Booking....");
+                String[] newBookingStr = new String[] {view.guestNametxf.getText(), view.numTxf.getText(), (String)view.roomOptions.getSelectedItem()};
+                model.createBooking(newBookingStr);
+                break;
+//                model.fetchBookings();
             default:
                 break;
         }

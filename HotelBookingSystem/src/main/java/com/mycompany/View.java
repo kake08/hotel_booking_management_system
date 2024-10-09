@@ -13,6 +13,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -27,6 +28,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -46,21 +48,38 @@ public class View extends JFrame implements ModelListener{
     Integer bookingMode; //1:MANAGE BOOKING 2:MANAGE GUEST 3:MANAGE ROOMS
     String strLoginMode;
     
+    JPanel tabPanel1; //Staff bookings panel
     
     //Buttons
     JButton continueButton;
     JButton loginButton;
+    JButton btnLogout1; //guest
+    JButton btnLogout2; //staff
+    
+    JButton createBookingBtn;
+    JTextField guestNametxf;
+    JTextField numTxf;
+    JComboBox<String> roomOptions;
     
     //Labels
     JLabel loginMessage;
+    JLabel manageBookingMSG;
+    JLabel labelPW;
     
     //Textbox or Typing fields
     JTextField username;
     JPasswordField password ;
     
-    
     //Combobox
     JComboBox<String> userComboBox;
+    
+    //Tables and strlist
+    MyTableModel tableModel;
+    JTable bookingsTable;
+    String[][] myStrBookingList;
+    
+    //Data
+    Data data;
     
     //Constructor
     public View() {
@@ -70,6 +89,7 @@ public class View extends JFrame implements ModelListener{
 
         //should only load on staff login
         loadStaffMenuPanel();
+        
         loadGuestMenuPanel();
         loadBookingForms();
         
@@ -83,6 +103,9 @@ public class View extends JFrame implements ModelListener{
     public void addActionListener(ActionListener listener) {
         this.continueButton.addActionListener(listener);
         this.loginButton.addActionListener(listener);
+        this.btnLogout1.addActionListener(listener);
+        this.btnLogout2.addActionListener(listener);
+        this.createBookingBtn.addActionListener(listener);
     }
    
      
@@ -95,7 +118,7 @@ public class View extends JFrame implements ModelListener{
         
         //MAIN PANEL
         mainPanel = new JPanel();
-        mainPanel.setBorder(new TitledBorder("MAIN PANEL"));
+        mainPanel.setBorder(new TitledBorder("Hotel Booking System - MAIN PANEL"));
         cards = new CardLayout();
         mainPanel.setLayout(cards);
         bookingFormCards = new CardLayout();
@@ -131,24 +154,6 @@ public class View extends JFrame implements ModelListener{
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
         continueButton = new JButton("Continue");
-//        continueButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                if (userComboBox.getSelectedItem().equals("Login as Guest"))
-//                {
-//                    menuPanel.setBorder(new TitledBorder("Guest Menu"));
-//                    loginPanel.setBorder(new TitledBorder("Guest Login"));
-//                }
-//                    
-//                else
-//                {
-//                    menuPanel.setBorder(new TitledBorder("Staff Menu"));
-//                    loginPanel.setBorder(new TitledBorder("Staff Login"));
-//                }
-//                    
-//                cards.show(mainPanel, "LOGINPANEL");
-//            }            
-//        });
         userOptionComponents.add(continueButton, gbc);
         
         startPanel.add(userOptionComponents, BorderLayout.CENTER);
@@ -187,7 +192,7 @@ public class View extends JFrame implements ModelListener{
         gbc.gridy = 2;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
-        JLabel labelPW = new JLabel("Password:     ");
+        labelPW = new JLabel("Password:     ");
         loginComponents.add(labelPW, gbc);
         
         gbc.gridx = 1;
@@ -249,19 +254,22 @@ public class View extends JFrame implements ModelListener{
         
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.addActionListener(new ActionListener() {
+        btnLogout1 = new JButton("Logout");
+        btnLogout1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cards.show(mainPanel, "LOGINPANEL");
+                
             }
         });
         
-        bottomPanel.add(btnLogout);
+        bottomPanel.add(btnLogout1);
         guestMenuPanel.add(bottomPanel, BorderLayout.SOUTH);
         guestMenuPanel.add(menuComponents, BorderLayout.CENTER);
         mainPanel.add(guestMenuPanel, "GUESTMENUPANEL");
     }
+    
+
     
     private void loadStaffMenuPanel() {
         staffMenuPanel = new JPanel();
@@ -270,7 +278,7 @@ public class View extends JFrame implements ModelListener{
         //TabbedPane has tabPanel1, tabPanel2, tabPanel3
         JTabbedPane menuComponents = new JTabbedPane();
         //MANAGE BOOKINGS
-        JPanel tabPanel1 = new JPanel();               
+        tabPanel1 = new JPanel();               
         //MANAGE GUESTS
         JPanel tabPanel2 = new JPanel();
         //MANAGE ROOMS
@@ -285,14 +293,14 @@ public class View extends JFrame implements ModelListener{
         
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.addActionListener(new ActionListener() {
+        btnLogout2 = new JButton("Logout");
+        btnLogout2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cards.show(mainPanel, "LOGINPANEL");
             }
         });
-        bottomPanel.add(btnLogout);
+        bottomPanel.add(btnLogout2);
         
         staffMenuPanel.add(bottomPanel, BorderLayout.SOUTH);
         staffMenuPanel.add(menuComponents, BorderLayout.CENTER);
@@ -313,19 +321,20 @@ public class View extends JFrame implements ModelListener{
 
         JLabel label1 = new JLabel("Enter New Booking Details: ");
         JLabel guestNameLabel = new JLabel("Guest Name: ");
-        JTextField guestNametxf = new JTextField(10);
+        guestNametxf = new JTextField(10);
         JLabel numLabel = new JLabel("Phone Number: ");
-        JTextField numTxf = new JTextField(10);
+        numTxf = new JTextField(10);
         JLabel roomTypeLabel = new JLabel("Room Type: ");
         String[] strRoomOptions = new String[] {"Standard", "Deluxe", "Suite"};
-        JComboBox<String> roomOptions = new JComboBox<String>(strRoomOptions);                
-        JButton addBtn = new JButton("Submit");
+        roomOptions = new JComboBox<String>(strRoomOptions);                
+        createBookingBtn = new JButton("Create Booking");
         JButton clearBtn = new JButton("Clear");
         clearBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 guestNametxf.setText(null);
                 numTxf.setText(null);
+                manageBookingMSG.setText("");
                 
             }
         });
@@ -346,7 +355,7 @@ public class View extends JFrame implements ModelListener{
         createForm.add(roomOptions, gbc);
         //Adding Submit Button at the end
         gbc.gridx = 1; gbc.gridy = 4; gbc.gridheight = 1; gbc.gridwidth = 1;                    
-        createForm.add(addBtn, gbc);
+        createForm.add(createBookingBtn, gbc);
         gbc.gridx = 1; gbc.gridy = 5; gbc.gridheight = 1; gbc.gridwidth = 1;
         createForm.add(clearBtn, gbc);
         //Adding form to the Panel with cards layout
@@ -463,12 +472,21 @@ public class View extends JFrame implements ModelListener{
         leftPanel1btnTOP.setLayout(new GridLayout(3,2));
         leftPanel1btnCENTER = new JPanel();
         leftPanel1btnCENTER.setLayout(bookingFormCards);
+        JPanel leftPanel1MessageBOTTOM = new JPanel();
+        leftPanel1MessageBOTTOM.setLayout(new FlowLayout());
         
         
-        //Adding Top and Bottom Panels into left split pane
+        
+        
+        //Adding Top, CENTER and Bottom Panels into left split pane
         leftPanel1.add(leftPanel1btnTOP, BorderLayout.NORTH);
         leftPanel1.add(leftPanel1btnCENTER, BorderLayout.CENTER);
+        leftPanel1.add(leftPanel1MessageBOTTOM, BorderLayout.SOUTH);
         loadBookingForms();
+        
+        //Adding Label for user feedback to left splitpane, BOTTOM border
+        manageBookingMSG = new JLabel("");
+        leftPanel1MessageBOTTOM.add(manageBookingMSG);
         
         //Adding buttons to left splitpane, North border
         JLabel northBtnTitle1 = new JLabel("Filter Booking List:");
@@ -538,14 +556,14 @@ public class View extends JFrame implements ModelListener{
         leftPanel1btnTOP.add(checkOutBtn);
         leftPanel1btnTOP.add(cancelBtn);
                
-        
-        String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
-        String[] tableHeadings = new String[] {"Booking ID", "Guest", "Room Number"};
-        JTable bookingsTable = new JTable(myStrList, tableHeadings){ 
+        //Initializing Table model which reflects Booking records
+        tableModel = new MyTableModel();
+        bookingsTable = new JTable(tableModel){
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
          }
         };
+        
         
         //Adding Table to scrollPane
         JScrollPane sp1 = new JScrollPane(leftPanel1);
@@ -555,6 +573,7 @@ public class View extends JFrame implements ModelListener{
         tabPanel1Inner.setResizeWeight(.5d); 
         tabPanel1.add(tabPanel1Inner, BorderLayout.CENTER);
     }
+     
     
 
     private void loadManageGuests(JPanel tabPanel2) {
@@ -591,7 +610,7 @@ public class View extends JFrame implements ModelListener{
         //Loading the table data
         String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
         String[] tableHeadings = new String[] {"Guest", "Room Number", "Request"};
-        JTable bookingsTable = new JTable(myStrList, tableHeadings){ 
+        JTable guestsTable = new JTable(myStrList, tableHeadings){ 
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
          }
@@ -599,13 +618,15 @@ public class View extends JFrame implements ModelListener{
         
         //Adding Table to scrollPane
         JScrollPane sp1 = new JScrollPane(leftPanel2);
-        JScrollPane sp2 = new JScrollPane(bookingsTable);        
+        JScrollPane sp2 = new JScrollPane(guestsTable);        
         JSplitPane tabPanel2Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
         //Where the splitpane is located along the middle of two panes
         tabPanel2Inner.setResizeWeight(.5d); 
         tabPanel2.add(tabPanel2Inner, BorderLayout.CENTER);
     }
     
+    
+    //TODO
     private void loadManageRooms(JPanel tabPanel3) {
         tabPanel3.setLayout(new BorderLayout());
         
@@ -616,6 +637,10 @@ public class View extends JFrame implements ModelListener{
         JPanel leftPanel3btnTOP = new JPanel();
         leftPanel3btnTOP.setLayout(new GridLayout(3,2));
     }
+    
+    
+    
+
 
     @Override
     public void onModelUpdate(Data data) {
@@ -623,20 +648,28 @@ public class View extends JFrame implements ModelListener{
             this.username.setText("");
             this.password.setText("");
             this.loginMessage.setText("Invalid username or password. Try Again.");
-        } else {
+        } else { //SHOW THE MENU PANEL -'reload' all the tables as data has been updated
             this.username.setText("");
             this.password.setText("");
             this.loginMessage.setText("");
             if (data.userMode == 0) //guest
             {
                 cards.show(mainPanel, "GUESTMENUPANEL");
+//                mainPanel.setBorder(new TitledBorder("Hotel Booking System - MAIN PANEL"));
+                mainPanel.setBorder(new TitledBorder("You are logged in as " + data.currentloggeduser));
+                
             }
             else if (data.userMode == 1) { //staff
                 cards.show(mainPanel, "STAFFMENUPANEL");
+                mainPanel.setBorder(new TitledBorder("You are logged in as " + data.currentloggeduser + " (STAFF)"));
+                if (data.isBookingFlag()){
+                    manageBookingMSG.setText("BOOKING ADDED!\nBooking ID: \nRoom Number: ...., Room Type:.... \nGuest Name: .... Guest ID:.... ");
+//                    manageBookingsMSG.setText(data.getmanageBookingMSG = returns a string);
+                    data.setBookingFlag(false);
+                }
+
             }
         }
-        
-//        setUserMode(data.userMode);
         
         
     }
@@ -645,11 +678,13 @@ public class View extends JFrame implements ModelListener{
         if (userMode == 0) { //guest
             guestMenuPanel.setBorder(new TitledBorder("Guest Menu"));
             loginPanel.setBorder(new TitledBorder("Guest Login"));
+            mainPanel.setBorder(new TitledBorder("Hotel Booking System - MAIN PANEL"));
             this.loginMessage.setText("");
         }
         else if (userMode == 1) {
              staffMenuPanel.setBorder(new TitledBorder("Staff Menu"));
              loginPanel.setBorder(new TitledBorder("Staff Login"));
+             mainPanel.setBorder(new TitledBorder("Hotel Booking System - MAIN PANEL"));
              this.loginMessage.setText("");
         }
         cards.show(mainPanel, "LOGINPANEL");

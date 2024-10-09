@@ -9,9 +9,10 @@ package com.mycompany;
  * @author DeanK
  */
 public class Booking {
-    
+    //"Booking ID", "Guest Name", "GuestID", "CURRENT", "RoomNumber"
     private Integer bookingID; // unique booking id
     private Guest guest;
+    private boolean isCurrent;
     private static int bookingCount;
     private Room room;
     public Request myRequests;
@@ -33,4 +34,49 @@ public class Booking {
         guest.addNewBooking(this);
         myRequests = new Request();
     }
+    
+        /**
+     * @param isCurrent the isCurrent to set
+     */
+    public void setIsCurrent(boolean isCurrent) {
+        this.isCurrent = isCurrent;
+    }
+    
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    
+    
+    /**
+     * @return the bookingID
+     */
+    public Integer getBookingID() {
+        return bookingID;
+    }
+
+    /**
+     * @return the guest
+     */
+    public Guest getGuest() {
+        return guest;
+    }
+
+    /**
+     * @return the isCurrent
+     */
+    public boolean isIsCurrent() {
+        return isCurrent;
+    }
+
+    /**
+     * @return the room
+     */
+    public Room getRoom() {
+        return room;
+    }
+    
+    
+    
+    
 }
