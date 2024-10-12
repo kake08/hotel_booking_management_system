@@ -17,10 +17,14 @@ public class Data {
 //collective for different data collections?
     //A data structure for bookings e.g. arraylists
     boolean loginFlag = false;
+    
     private boolean bookingFlag = false;
+    private boolean bookingSuccess;
     
 //    boolean modelFetched = false;
-    MyTableModel tableModel = new MyTableModel();
+    MyTableModel tableModelBookings = new MyTableModel();
+    MyTableModel tableModelGuests = new MyTableModel();
+    MyTableModel tableModelRooms = new MyTableModel();
     
     int userMode = -1; //-1 neither, 0 for guest, 1 for staff
     String currentloggeduser = null; //used for functions
@@ -29,6 +33,11 @@ public class Data {
     //TODO:
     HashMap <Integer, Guest> guestList;
     ArrayList<Room> roomsList;  
+    
+    
+    
+    
+    
     
     
     
@@ -44,6 +53,20 @@ public class Data {
      */
     public void setBookingFlag(boolean bookingFlag) {
         this.bookingFlag = bookingFlag;
+    }
+
+    /**
+     * @return the bookingSuccess
+     */
+    public boolean isBookingSuccess() {
+        return bookingSuccess;
+    }
+
+    /**
+     * @param bookingSuccess the bookingSuccess to set
+     */
+    public void setBookingSuccess(boolean bookingSuccess) {
+        this.bookingSuccess = bookingSuccess;
     }
     
 }

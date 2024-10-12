@@ -4,7 +4,6 @@
  */
 package com.mycompany;
 
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -57,35 +56,50 @@ public class Model {
     
     //Notifying the listener(view) when data is updated
     
-    public void fetchBookings() { 
-        db.fetchBookings(data.tableModel);
-        notifyListener();
+    public void fetchData() { 
+        db.fetchBookings(data.tableModelBookings);
+        db.fetchGuests(data.tableModelGuests);
+        db.fetchRooms(data.tableModelRooms);
         
-//        data.tableModel = db.fetchBookings();
-//        data.tableModel.fireTableDataChanged();       
+        notifyListener();
+            
     }
     
     public void createBooking(String bookingDetails[]){
         String guestName = bookingDetails[0];
         String guestPhone = bookingDetails[1];
         String selectedRoomType = bookingDetails[2];
-        //process of automating room selection.... TODO
+        data.setBookingFlag(true); //true means it will go through booking process
+        
+        
         
         //if (no matches) else(matches -> feed the guestID to method)
-        //data.setBookingFlag(db.createBooking(guestName, guestPhone, selectedRoomType, guestID = null if no existing guest));
-        
-        //creates a booking
-        data.setBookingFlag(db.createBooking(guestName, guestPhone, selectedRoomType));
-        
-        fetchBookings(); //refreshes table view
+        Guest guest = db.matchingGuestExist(guestName, guestPhone); //-1 is null, other number is the matching guest ID
+        if (guest == null) {
+            //creates a booking for a new guest
+            data.setBookingSuccess(db.createBooking(guestName, guestPhone, selectedRoomType, -1)); //failed the booking process
+
+        } else {
+            //creates a booking for a existing guest
+            //TODO: confirm staff user before booking
+            data.setBookingSuccess(db.createBooking(guestName, guestPhone, selectedRoomType, guest.getGuestID()));
+        }
+               
+        if (!data.isBookingSuccess()) {
+            listener.onModelUpdate(this.data);
+            return;
+        }
+        fetchData(); //refreshes table view
         refreshLists();
+    }
+    
+    public void checkINGuest (String bookingID) {
+        //occupies the room
     }
     
     //Refresh all lists including: Bookings, Guests and Rooms table -> Only updates database -> Data.
     //Data is always an updated reflection of what's on the database
     public void refreshLists() {
-
-//        fetchBookings();
         notifyListener();
     }
     

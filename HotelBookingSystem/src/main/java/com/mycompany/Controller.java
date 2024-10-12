@@ -21,7 +21,9 @@ public class Controller implements ActionListener {
         this.model = model;
         this.view.addActionListener(this);
         //make sure the view table model is assigned TO THE model table model
-        model.data.tableModel = view.tableModel;
+        model.data.tableModelBookings = view.tableModelBookings;
+        model.data.tableModelGuests = view.tableModelGuests;
+        model.data.tableModelRooms = view.tableModelRooms;
 //        model.data = view.data;
     }
     
@@ -36,7 +38,7 @@ public class Controller implements ActionListener {
                 System.out.println(action + " clicked!");
                 if(this.model.data.userMode == 1) {
                     this.model.checkStaffLogin(username, password);
-                    model.fetchBookings();
+                    model.fetchData();
                 }
                 else if (this.model.data.userMode == 0) {
                     this.model.checkGuestLogin(username, password);
@@ -66,7 +68,11 @@ public class Controller implements ActionListener {
                 String[] newBookingStr = new String[] {view.guestNametxf.getText(), view.numTxf.getText(), (String)view.roomOptions.getSelectedItem()};
                 model.createBooking(newBookingStr);
                 break;
-//                model.fetchBookings();
+            case "Check In Guest":
+                System.out.println("Checking out Guest");
+                String bookingID = view.bookingIDtxf1.getText();
+                model.checkINGuest(bookingID);
+                break;
             default:
                 break;
         }

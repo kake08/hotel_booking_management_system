@@ -14,6 +14,7 @@ public class Guest{
     ArrayList<Booking> myBookings = new ArrayList<>(); //bookingID
     private static int guestCount; //Used for new guests' ID
     
+    private int guestID;
     String guestName;
     String guestPhone; 
     
@@ -25,8 +26,9 @@ public class Guest{
         //super(guestCount, name, value); //- used for when Guest extends User 
         guestName = name;
         guestPhone = value;
-        
     }
+    
+    
     
     public void loadBooking(Booking booking) {
         myBookings.add(booking);
@@ -41,6 +43,20 @@ public class Guest{
     
     public void addNewBooking(Booking newBooking) {
         myBookings.add(newBooking);
+    }
+
+    /**
+     * @return the guestID
+     */
+    public int getGuestID() {
+        return guestID;
+    }
+
+    /**
+     * @param guestID the guestID to set
+     */
+    public void setGuestID(int guestID) {
+        this.guestID = guestID;
     }
     
 }

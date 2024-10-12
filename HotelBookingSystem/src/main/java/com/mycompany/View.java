@@ -6,16 +6,12 @@ package com.mycompany;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -28,7 +24,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -46,7 +41,7 @@ public class View extends JFrame implements ModelListener{
     JPanel leftPanel2btnCENTER; //Manage guest forms
     CardLayout bookingFormCards;
     Integer bookingMode; //1:MANAGE BOOKING 2:MANAGE GUEST 3:MANAGE ROOMS
-    String strLoginMode;
+//    String strLoginMode;
     
     JPanel tabPanel1; //Staff bookings panel
     
@@ -55,10 +50,10 @@ public class View extends JFrame implements ModelListener{
     JButton loginButton;
     JButton btnLogout1; //guest
     JButton btnLogout2; //staff
+    JButton submitbtn1; //CHECK IN BUTTON
     
     JButton createBookingBtn;
-    JTextField guestNametxf;
-    JTextField numTxf;
+
     JComboBox<String> roomOptions;
     
     //Labels
@@ -69,13 +64,20 @@ public class View extends JFrame implements ModelListener{
     //Textbox or Typing fields
     JTextField username;
     JPasswordField password ;
+    JTextField guestNametxf; //Guest name - create booking
+    JTextField numTxf; //Guest Phone number = createbooking
+    JTextField bookingIDtxf1;
     
     //Combobox
     JComboBox<String> userComboBox;
     
     //Tables and strlist
-    MyTableModel tableModel;
+    MyTableModel tableModelBookings; // bookings
+    MyTableModel tableModelGuests;
+    MyTableModel tableModelRooms;
     JTable bookingsTable;
+    JTable guestsTable;
+    JTable roomsTable;
     String[][] myStrBookingList;
     
     //Data
@@ -106,6 +108,7 @@ public class View extends JFrame implements ModelListener{
         this.btnLogout1.addActionListener(listener);
         this.btnLogout2.addActionListener(listener);
         this.createBookingBtn.addActionListener(listener);
+        this.submitbtn1.addActionListener(listener);
     }
    
      
@@ -325,7 +328,7 @@ public class View extends JFrame implements ModelListener{
         JLabel numLabel = new JLabel("Phone Number: ");
         numTxf = new JTextField(10);
         JLabel roomTypeLabel = new JLabel("Room Type: ");
-        String[] strRoomOptions = new String[] {"Standard", "Deluxe", "Suite"};
+        String[] strRoomOptions = new String[] {"STANDARD", "DELUXE", "SUITE"};
         roomOptions = new JComboBox<String>(strRoomOptions);                
         createBookingBtn = new JButton("Create Booking");
         JButton clearBtn = new JButton("Clear");
@@ -366,8 +369,8 @@ public class View extends JFrame implements ModelListener{
         checkinForm.setLayout(new GridBagLayout());
         JLabel label2 = new JLabel("Check In Guest: ");
         JLabel bookingIdLabel1 = new JLabel("Booking ID: ");
-        JTextField bookingIDtxf1 = new JTextField(10);
-        JButton submitbtn1 = new JButton("Check In Guest");
+        bookingIDtxf1 = new JTextField(10);
+        submitbtn1 = new JButton("Check In Guest");
         JButton clearBtn1 = new JButton("Clear");
         clearBtn1.addActionListener(new ActionListener() {
             @Override
@@ -557,8 +560,8 @@ public class View extends JFrame implements ModelListener{
         leftPanel1btnTOP.add(cancelBtn);
                
         //Initializing Table model which reflects Booking records
-        tableModel = new MyTableModel();
-        bookingsTable = new JTable(tableModel){
+        tableModelBookings = new MyTableModel();
+        bookingsTable = new JTable(tableModelBookings){
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
          }
@@ -586,7 +589,7 @@ public class View extends JFrame implements ModelListener{
         JPanel leftPanel2btnTOP = new JPanel();
         leftPanel2btnTOP.setLayout(new GridLayout(3,2)); //3 by 2 menu components
         leftPanel2btnCENTER = new JPanel();
-        leftPanel2btnCENTER.setLayout(bookingFormCards); //Setting as cards layout
+//        leftPanel2btnCENTER.setLayout(bookingFormCards); //Setting as cards layout
         
         //Adding Top and Bottom Panels into left split Panel
         leftPanel2.add(leftPanel2btnTOP, BorderLayout.NORTH);
@@ -607,10 +610,11 @@ public class View extends JFrame implements ModelListener{
             
         leftPanel2btnTOP.add(completeBtn);
         
-        //Loading the table data
-        String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
-        String[] tableHeadings = new String[] {"Guest", "Room Number", "Request"};
-        JTable guestsTable = new JTable(myStrList, tableHeadings){ 
+        //Initializing Table model which reflects Guest records
+//        String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
+//        String[] tableHeadings = new String[] {"Guest", "Room Number", "Request"};
+        tableModelGuests = new MyTableModel();
+        guestsTable = new JTable(tableModelGuests){ 
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
          }
@@ -628,6 +632,7 @@ public class View extends JFrame implements ModelListener{
     
     //TODO
     private void loadManageRooms(JPanel tabPanel3) {
+        
         tabPanel3.setLayout(new BorderLayout());
         
         //Panel for Left side of Manage Rooms for menu
@@ -636,6 +641,67 @@ public class View extends JFrame implements ModelListener{
         
         JPanel leftPanel3btnTOP = new JPanel();
         leftPanel3btnTOP.setLayout(new GridLayout(3,2));
+        JPanel leftPanel3btnCENTER = new JPanel();
+//        leftPanel3btnCENTER.setLayout(manageRoomCards); //TODO
+        JPanel leftPanel3MessageBOTTOM = new JPanel();
+        leftPanel3MessageBOTTOM.setLayout(new FlowLayout());
+        
+        
+        //Adding Top, Center, bottom panels to left split pane
+        leftPanel3.add(leftPanel3btnTOP, BorderLayout.NORTH);
+        leftPanel3.add(leftPanel3btnCENTER, BorderLayout.CENTER);
+        leftPanel3.add(leftPanel3MessageBOTTOM, BorderLayout.SOUTH);
+//        loadRoomForms(); //todo
+
+//        Adding label for user feedback to left split pane, bottom border
+        JLabel manageRoomMSG = new JLabel("manageRoomMSG to leftPanel3BOTTOM");
+        leftPanel3MessageBOTTOM.add(manageRoomMSG);
+        
+        //Adding buttons to left splitpane, North border
+        JLabel northBtnTitle3 = new JLabel("Filter Booking List: ");
+        String[] strFilterOptions = new String[]{"All Rooms", "Rooms occupied", "Rooms available"};
+        JComboBox<String> filterOptions = new JComboBox<String>(strFilterOptions);
+        
+        leftPanel3btnTOP.add(northBtnTitle3);
+        leftPanel3btnTOP.add(filterOptions);
+        
+        
+        //Adding Buttons to left splitpane, CENTRAL border forms TODO e.g.:
+//        JButton makeBookingbtn = new JButton("Create Booking");
+//        makeBookingbtn.addActionListener(new ActionListener() {          
+//            @Override
+//            public void actionPerformed(ActionEvent e) {  
+//                if (bookingMode == 1) {
+//                    bookingFormCards.show(leftPanel1btnCENTER, "CLEARFORM");
+//                    bookingMode = -1;
+//                    return;
+//                }
+//                bookingFormCards.show(leftPanel1btnCENTER, "CREATEFORM");
+//                bookingMode = 1;
+//            }
+//        });
+        
+        
+       
+        
+//        Initializing table model which reflects booking records
+            tableModelRooms = new MyTableModel();
+            roomsTable = new JTable(tableModelRooms){
+            public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
+            return false;
+         }
+        };
+        
+        
+        //Adding Table to scrollPane
+        JScrollPane sp1 = new JScrollPane(leftPanel3);
+        JScrollPane sp2 = new JScrollPane(roomsTable);        
+        JSplitPane tabPanel3Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
+        //Where the splitpane is located along the middle of two panes
+        tabPanel3Inner.setResizeWeight(.5d); 
+        tabPanel3.add(tabPanel3Inner, BorderLayout.CENTER);
+        
+        
     }
     
     
@@ -662,15 +728,25 @@ public class View extends JFrame implements ModelListener{
             else if (data.userMode == 1) { //staff
                 cards.show(mainPanel, "STAFFMENUPANEL");
                 mainPanel.setBorder(new TitledBorder("You are logged in as " + data.currentloggeduser + " (STAFF)"));
-                if (data.isBookingFlag()){
-                    manageBookingMSG.setText("BOOKING ADDED!\nBooking ID: \nRoom Number: ...., Room Type:.... \nGuest Name: .... Guest ID:.... ");
-//                    manageBookingsMSG.setText(data.getmanageBookingMSG = returns a string);
-                    data.setBookingFlag(false);
-                }
-
+                if (data.isBookingFlag()) {
+                    setManageBookingMSG(data);
+                }             
             }
         }
         
+        
+    }
+    
+    private void setManageBookingMSG(Data data){
+
+        if (data.isBookingSuccess()){
+            //convert to a card???
+            manageBookingMSG.setText("BOOKING ADDED!\nBooking ID: \nRoom Number: ...., Room Type:.... \nGuest Name: .... Guest ID:.... ");
+//                    manageBookingsMSG.setText(data.getmanageBookingMSG = returns a string);
+        } else if (!data.isBookingSuccess()) {
+            manageBookingMSG.setText("No Room Available for that Room Type! Check Rooms Availability.");
+        }
+        data.setBookingFlag(false);
         
     }
     
