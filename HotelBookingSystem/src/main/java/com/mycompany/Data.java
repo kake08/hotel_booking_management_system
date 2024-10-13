@@ -19,7 +19,7 @@ public class Data {
     boolean loginFlag = false;
     
     private boolean bookingFlag = false;
-    private boolean bookingSuccess;
+    private boolean bookingSuccess = false;
     
 //    boolean modelFetched = false;
     MyTableModel tableModelBookings = new MyTableModel();
@@ -27,12 +27,20 @@ public class Data {
     MyTableModel tableModelRooms = new MyTableModel();
     
     int userMode = -1; //-1 neither, 0 for guest, 1 for staff
-    String currentloggeduser = null; //used for functions
+    String currentloggeduser = null;
+
+    //used for functions
     
-    ArrayList<Booking> AllBookings = new ArrayList<Booking>();
-    //TODO:
-    HashMap <Integer, Guest> guestList;
-    ArrayList<Room> roomsList;  
+    
+    private Booking recentBooking;
+    private Guest recentGuest = new Guest("null", "null");
+    private Room recentRoom = new Room(-1, "NULL");
+    
+    public Data() {
+        this.recentBooking = new Booking(-1, "No Recent Guest", getRecentGuest());
+        this.recentBooking.setRoom(recentRoom);
+    }
+    
     
     
     
@@ -67,6 +75,48 @@ public class Data {
      */
     public void setBookingSuccess(boolean bookingSuccess) {
         this.bookingSuccess = bookingSuccess;
+    }
+
+    /**
+     * @return the recentBooking
+     */
+    public Booking getRecentBooking() {
+        return recentBooking;
+    }
+
+    /**
+     * @param recentBooking the recentBooking to set
+     */
+    public void setRecentBooking(Booking recentBooking) {
+        this.recentBooking = recentBooking;
+    }
+
+    /**
+     * @return the recentGuest
+     */
+    public Guest getRecentGuest() {
+        return recentGuest;
+    }
+
+    /**
+     * @param recentGuest the recentGuest to set
+     */
+    public void setRecentGuest(Guest recentGuest) {
+        this.recentGuest = recentGuest;
+    }
+
+    /**
+     * @return the recentRoom
+     */
+    public Room getRecentRoom() {
+        return recentRoom;
+    }
+
+    /**
+     * @param recentRoom the recentRoom to set
+     */
+    public void setRecentRoom(Room recentRoom) {
+        this.recentRoom = recentRoom;
     }
     
 }

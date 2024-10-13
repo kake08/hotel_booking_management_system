@@ -24,7 +24,8 @@ public class Controller implements ActionListener {
         model.data.tableModelBookings = view.tableModelBookings;
         model.data.tableModelGuests = view.tableModelGuests;
         model.data.tableModelRooms = view.tableModelRooms;
-//        model.data = view.data;
+        
+        view.loadBookingMSGCards();
     }
     
     //TODO

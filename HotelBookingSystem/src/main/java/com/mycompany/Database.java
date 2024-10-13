@@ -289,15 +289,15 @@ public class Database {
         return false;
     }
     
-    public void updateGuestsList(Data data) {
-            System.out.println("TODO - updateGuestsList - database.java");
-//        try {
-//            Statement statement = conn.createStatement();
-//            ResultSet rs = statement.executeQuery("SELECT * FROM guests");
-//        }catch (SQLException e) {
-//            System.out.println("SQLException in updateBookingsList() Database.java: " + e.getMessage());
-//        }
-    }
+//    public void updateGuestsList(Data data) {
+//            System.out.println("TODO - updateGuestsList - database.java");
+////        try {
+////            Statement statement = conn.createStatement();
+////            ResultSet rs = statement.executeQuery("SELECT * FROM guests");
+////        }catch (SQLException e) {
+////            System.out.println("SQLException in updateBookingsList() Database.java: " + e.getMessage());
+////        }
+//    }
     
     //Called in model before making booking for finding an identical guest (same matching details)
     public Guest matchingGuestExist(String guestName, String guestPhone){

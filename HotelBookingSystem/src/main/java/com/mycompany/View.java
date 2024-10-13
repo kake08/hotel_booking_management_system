@@ -40,10 +40,15 @@ public class View extends JFrame implements ModelListener{
     JPanel leftPanel1btnCENTER; //Manage bookings forms
     JPanel leftPanel2btnCENTER; //Manage guest forms
     CardLayout bookingFormCards;
+    CardLayout bookingMSGCards;
     Integer bookingMode; //1:MANAGE BOOKING 2:MANAGE GUEST 3:MANAGE ROOMS
 //    String strLoginMode;
     
+    
+    //JPanels
     JPanel tabPanel1; //Staff bookings panel
+    JPanel leftPanel1MessageBOTTOM;
+    JPanel leftPanel3MessageBOTTOM;
     
     //Buttons
     JButton continueButton;
@@ -81,7 +86,7 @@ public class View extends JFrame implements ModelListener{
     String[][] myStrBookingList;
     
     //Data
-    Data data;
+    Data data = new Data();
     
     //Constructor
     public View() {
@@ -125,6 +130,7 @@ public class View extends JFrame implements ModelListener{
         cards = new CardLayout();
         mainPanel.setLayout(cards);
         bookingFormCards = new CardLayout();
+        bookingMSGCards = new CardLayout();
         bookingMode = -1; 
         
         //Start Up Panel
@@ -463,6 +469,42 @@ public class View extends JFrame implements ModelListener{
         
     }
     
+    public void loadBookingMSGCards() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        //1.EMPTY PANEL
+        JPanel defaultEmptyCard = new JPanel();
+        leftPanel1MessageBOTTOM.add(defaultEmptyCard, "EMPTYMSG");
+        
+        //2.Successful booking MSG
+        JPanel successMSGCard = new JPanel();
+        successMSGCard.setLayout(new GridBagLayout());       
+        
+        JLabel title = new JLabel("Booking confirmed for: ");
+        JLabel guestNameLabel = new JLabel("GuestName: "+ data.getRecentBooking().getGuest().guestName);
+        JLabel roomLabel = new JLabel("Room: " + data.getRecentBooking().getRoom().roomNumber + "Roomtype: " + data.getRecentBooking().getRoom().roomType);
+        JLabel bookingNoLabel = new JLabel("Room: " + data.getRecentBooking().getBookingID());
+    
+        
+        //Adding message components to panel
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridheight = 1; gbc.gridwidth = 1;
+        successMSGCard.add(title, gbc);
+        gbc.gridy = 1;
+        successMSGCard.add(guestNameLabel, gbc);
+        gbc.gridy = 2;
+        successMSGCard.add(roomLabel, gbc);
+        gbc.gridy = 3;
+        successMSGCard.add(bookingNoLabel, gbc);
+        
+        //Adding a card to one of cards layout panel
+        leftPanel1MessageBOTTOM.add(successMSGCard, "SUCCESSMSG");
+        
+        this.bookingMSGCards.show(leftPanel1MessageBOTTOM, "EMPTYMSG");
+    }
+    
+    
+    
     private void loadManageBookingsPanel(JPanel tabPanel1) {
         
         tabPanel1.setLayout(new BorderLayout());
@@ -475,8 +517,8 @@ public class View extends JFrame implements ModelListener{
         leftPanel1btnTOP.setLayout(new GridLayout(3,2));
         leftPanel1btnCENTER = new JPanel();
         leftPanel1btnCENTER.setLayout(bookingFormCards);
-        JPanel leftPanel1MessageBOTTOM = new JPanel();
-        leftPanel1MessageBOTTOM.setLayout(new FlowLayout());
+        leftPanel1MessageBOTTOM = new JPanel();
+        leftPanel1MessageBOTTOM.setLayout(bookingMSGCards);
         
         
         
@@ -487,9 +529,6 @@ public class View extends JFrame implements ModelListener{
         leftPanel1.add(leftPanel1MessageBOTTOM, BorderLayout.SOUTH);
         loadBookingForms();
         
-        //Adding Label for user feedback to left splitpane, BOTTOM border
-        manageBookingMSG = new JLabel("");
-        leftPanel1MessageBOTTOM.add(manageBookingMSG);
         
         //Adding buttons to left splitpane, North border
         JLabel northBtnTitle1 = new JLabel("Filter Booking List:");
@@ -643,7 +682,7 @@ public class View extends JFrame implements ModelListener{
         leftPanel3btnTOP.setLayout(new GridLayout(3,2));
         JPanel leftPanel3btnCENTER = new JPanel();
 //        leftPanel3btnCENTER.setLayout(manageRoomCards); //TODO
-        JPanel leftPanel3MessageBOTTOM = new JPanel();
+        leftPanel3MessageBOTTOM = new JPanel();
         leftPanel3MessageBOTTOM.setLayout(new FlowLayout());
         
         
@@ -737,17 +776,20 @@ public class View extends JFrame implements ModelListener{
         
     }
     
-    private void setManageBookingMSG(Data data){
-
+    private String[] setManageBookingMSG(Data data){
+        
+        String[] output = null;
         if (data.isBookingSuccess()){
-            //convert to a card???
-            manageBookingMSG.setText("BOOKING ADDED!\nBooking ID: \nRoom Number: ...., Room Type:.... \nGuest Name: .... Guest ID:.... ");
+            this.bookingMSGCards.show(leftPanel1MessageBOTTOM, "SUCCESSMSG");
+//            manageBookingMSG.setText("BOOKING ADDED!\nBooking ID: \nRoom Number: ...., Room Type:.... \nGuest Name: .... Guest ID:.... ");
 //                    manageBookingsMSG.setText(data.getmanageBookingMSG = returns a string);
         } else if (!data.isBookingSuccess()) {
+            System.out.println("Error booking message TODO");
             manageBookingMSG.setText("No Room Available for that Room Type! Check Rooms Availability.");
         }
         data.setBookingFlag(false);
         
+        return output;
     }
     
     public void setUserMode(int userMode) {

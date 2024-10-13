@@ -85,10 +85,12 @@ public class Model {
             data.setBookingSuccess(db.createBooking(guestName, guestPhone, selectedRoomType, guest.getGuestID()));
         }
                
+        //if Booking was NOT successful
         if (!data.isBookingSuccess()) {
             listener.onModelUpdate(this.data);
             return;
         }
+        
         fetchData(); //refreshes table view
         refreshLists();
     }
