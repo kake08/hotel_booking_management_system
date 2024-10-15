@@ -10,4 +10,12 @@ package com.mycompany;
  */
 public interface ModelListener {
     void onModelUpdate(Data data);
+    
+    void checkInFeedbackMSG(int output);
+    
+    void checkOutFeedbackMSG(int output);
+    
+    void cancelBookingFeedbackMSG(int output);
+    
+    void createBookingFeedbackMSG(int output);
 }

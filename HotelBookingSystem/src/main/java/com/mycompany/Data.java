@@ -20,11 +20,15 @@ public class Data {
     
     private boolean bookingFlag = false;
     private boolean bookingSuccess = false;
+    private boolean checkInFlag = false;
+    private boolean checkInConfirmed = false;
+    private boolean checkOutFlag = false;
+    private boolean cancelBookingFlag = false;
     
-//    boolean modelFetched = false;
     MyTableModel tableModelBookings = new MyTableModel();
     MyTableModel tableModelGuests = new MyTableModel();
     MyTableModel tableModelRooms = new MyTableModel();
+    public String tableBookingsFilter = "All Bookings";
     
     int userMode = -1; //-1 neither, 0 for guest, 1 for staff
     String currentloggeduser = null;
@@ -118,5 +122,63 @@ public class Data {
     public void setRecentRoom(Room recentRoom) {
         this.recentRoom = recentRoom;
     }
+
+    /**
+     * @return the checkInFlag
+     */
+    public boolean isCheckInFlag() {
+        return checkInFlag;
+    }
+
+    /**
+     * @param checkInFlag the checkInFlag to set
+     */
+    public void setCheckInFlag(boolean checkInFlag) {
+        this.checkInFlag = checkInFlag;
+    }
+
+
+    /**
+     * @return the checkInConfirmed
+     */
+    public boolean isCheckInConfirmed() {
+        return checkInConfirmed;
+    }
+
+    /**
+     * @param checkInConfirmed the checkInConfirmed to set
+     */
+    public void setCheckInConfirmed(boolean checkInConfirmed) {
+        this.checkInConfirmed = checkInConfirmed;
+    }
+
+    /**
+     * @return the checkOutFlag
+     */
+    public boolean isCheckOutFlag() {
+        return checkOutFlag;
+    }
+
+    /**
+     * @param checkOutFlag the checkOutFlag to set
+     */
+    public void setCheckOutFlag(boolean checkOutFlag) {
+        this.checkOutFlag = checkOutFlag;
+    }
+
+    /**
+     * @return the cancelBookingFlag
+     */
+    public boolean isCancelBookingFlag() {
+        return cancelBookingFlag;
+    }
+
+    /**
+     * @param cancelBookingFlag the cancelBookingFlag to set
+     */
+    public void setCancelBookingFlag(boolean cancelBookingFlag) {
+        this.cancelBookingFlag = cancelBookingFlag;
+    }
+
     
 }

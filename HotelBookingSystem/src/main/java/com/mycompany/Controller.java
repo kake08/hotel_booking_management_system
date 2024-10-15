@@ -21,6 +21,7 @@ public class Controller implements ActionListener {
         this.model = model;
         this.view.addActionListener(this);
         //make sure the view table model is assigned TO THE model table model
+        model.data = view.data;
         model.data.tableModelBookings = view.tableModelBookings;
         model.data.tableModelGuests = view.tableModelGuests;
         model.data.tableModelRooms = view.tableModelRooms;
@@ -32,6 +33,7 @@ public class Controller implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String action = e.getActionCommand();
+        System.out.println(action);
         switch(action) {
             case "Log In":
                 String username = this.view.username.getText();
@@ -70,9 +72,44 @@ public class Controller implements ActionListener {
                 model.createBooking(newBookingStr);
                 break;
             case "Check In Guest":
-                System.out.println("Checking out Guest");
+                System.out.println("Checking in Guest....");
                 String bookingID = view.bookingIDtxf1.getText();
-                model.checkINGuest(bookingID);
+                //Find the booking details for that Booking ID
+                model.checkINGuest(bookingID);               
+                break;
+            case "Confirm Check In":
+                System.out.println("Confirming check in...");
+                //flag for checkinconfirmed
+                model.data.setCheckInConfirmed(true);
+                bookingID = view.bookingIDtxf1.getText();
+                model.checkINGuest(bookingID);  
+                break;
+            case "Check Out Guest":
+                System.out.println("Checking Out Guest....");
+                String bookingID2 = view.bookingIDtxf2.getText();
+                model.checkOUTGuest(bookingID2);
+                break;
+            case "Confirm Check Out":
+                System.out.println("Confirming check out...");
+                model.data.setCheckOutFlag(true);
+                bookingID = view.bookingIDtxf2.getText();
+                model.checkOUTGuest(bookingID);
+                break;
+            case "comboBoxChanged":
+                String string = (String) view.filterOptions.getSelectedItem();
+                model.data.tableBookingsFilter = string;
+                model.fetchData();
+                break;
+            case "Cancel Booking":
+                System.out.println("Cancelling booking...");
+                bookingID = view.bookingIDtxf3.getText();
+                model.cancelBooking(bookingID);
+                break;
+            case "Confirm Cancellation":
+                System.out.println("Confirming cancellation...");
+                model.data.setCancelBookingFlag(true);
+                bookingID = view.bookingIDtxf3.getText();
+                model.cancelBooking(bookingID);
                 break;
             default:
                 break;

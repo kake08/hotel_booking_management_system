@@ -34,12 +34,7 @@ public class Guest{
         myBookings.add(booking);
     }
     
-//    public void showMyCurrentBookings()
-//    public void showAllMyBookings();
-    
-//    public boolean equals(Guest i) {
-//        return this.getID() == i.getID(); //Based off parent class User (getID)
-//    }
+
     
     public void addNewBooking(Booking newBooking) {
         myBookings.add(newBooking);

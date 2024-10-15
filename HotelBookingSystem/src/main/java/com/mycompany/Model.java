@@ -30,7 +30,7 @@ public class Model {
     
     public void checkStaffLogin(String username, String password) {
         this.data = this.db.checkStaffLogin(username, password, this.data); 
-        refreshLists();
+//        refreshLists();
         notifyListener(); //listener is view - update view
     }
     
@@ -54,21 +54,25 @@ public class Model {
     }
     
     
-    //Notifying the listener(view) when data is updated
-    
+    //Notifying the listener(view) when data is updated    
     public void fetchData() { 
-        db.fetchBookings(data.tableModelBookings);
+        db.fetchBookings(data.tableModelBookings, data.tableBookingsFilter);
         db.fetchGuests(data.tableModelGuests);
         db.fetchRooms(data.tableModelRooms);
         
-        notifyListener();
-            
+        notifyListener();           
     }
-    
+   
+       
     public void createBooking(String bookingDetails[]){
         String guestName = bookingDetails[0];
         String guestPhone = bookingDetails[1];
         String selectedRoomType = bookingDetails[2];
+        
+        if ("".equals(guestName) || "".equals(guestPhone)){
+            listener.createBookingFeedbackMSG(-1);
+            return;
+        }
         data.setBookingFlag(true); //true means it will go through booking process
         
         
@@ -76,50 +80,164 @@ public class Model {
         //if (no matches) else(matches -> feed the guestID to method)
         Guest guest = db.matchingGuestExist(guestName, guestPhone); //-1 is null, other number is the matching guest ID
         if (guest == null) {
-            //creates a booking for a new guest
-            data.setBookingSuccess(db.createBooking(guestName, guestPhone, selectedRoomType, -1)); //failed the booking process
+            data = db.createBooking(guestName, guestPhone, selectedRoomType, -1, data);//failed the booking process
 
         } else {
             //creates a booking for a existing guest
-            //TODO: confirm staff user before booking
-            data.setBookingSuccess(db.createBooking(guestName, guestPhone, selectedRoomType, guest.getGuestID()));
-        }
-               
+            data = db.createBooking(guestName, guestPhone, selectedRoomType, guest.getGuestID(), data);
+        }               
         //if Booking was NOT successful
         if (!data.isBookingSuccess()) {
-            listener.onModelUpdate(this.data);
+            notifyListener();
+            return;
+        }        
+        fetchData(); //refreshes table view
+        notifyListener();
+    }
+   
+    
+    public void cancelBooking(String bookingID) {
+        int bookingIDint;
+        try {
+            bookingIDint = Integer.parseInt(bookingID);
+        } catch (NumberFormatException e) {
+            System.out.println("Error converting String to integer");
+            listener.checkOutFeedbackMSG(-1);
             return;
         }
         
-        fetchData(); //refreshes table view
-        refreshLists();
+        if (data.isCancelBookingFlag()) {
+            System.out.println("Confirming cancellation....");
+            boolean output = db.cancelBooking(data.getRecentRoom().roomNumber);
+            if (output) {
+                data.setCancelBookingFlag(false);
+                fetchData();
+                listener.cancelBookingFeedbackMSG(0);
+            } else {
+                listener.cancelBookingFeedbackMSG(-1);
+            }                  
+                    
+        } else {
+            int [] requiredStatus = new int[] {1,1};
+            String[] bookingDetails = db.findBookingIDMatch(bookingIDint, requiredStatus);
+            try {
+                data.setRecentRoom(new Room(Integer.parseInt(bookingDetails[2]), ""));
+            } catch (NumberFormatException e) {
+                System.out.println("Error converting roomnumber string to int - cancelGuest() in Model.java");
+                listener.checkOutFeedbackMSG(-1);
+            }catch (NullPointerException e) {
+                System.out.println("Error,Booking ID is not valid");
+                listener.checkOutFeedbackMSG(-1);
+                return;
+            }
+            Guest matchingGuest = new Guest(bookingDetails[0], ""); //guestname, guestphone
+            Booking matchingBooking = new Booking(bookingIDint, bookingDetails[0], matchingGuest); //bookingid, guestname, matchingGuest
+            data.setRecentBooking(matchingBooking);   
+
+            notifyListener();
+            listener.cancelBookingFeedbackMSG(1);             
+            
+        }
+        
+        
     }
+    
+    
+    public void checkOUTGuest (String bookingID) {
+        int bookingIDint;
+        try {
+            bookingIDint = Integer.parseInt(bookingID);
+        } catch (NumberFormatException e) {
+            System.out.println("Error converting String to integer");
+            listener.checkOutFeedbackMSG(-1);
+            return;
+        }
+        
+        if (data.isCheckOutFlag()) {
+            System.out.println("Confirming check in....");
+            boolean output = db.checkOUTGuest(data.getRecentRoom().roomNumber);
+            if (output) {
+                data.setCheckOutFlag(false);
+                fetchData();
+                listener.checkOutFeedbackMSG(0);
+            } else {
+                listener.checkOutFeedbackMSG(-1);
+            }
+            
+        }
+        else {
+            int[] requiredStatus = new int[]{20,21};
+            String[] bookingDetails = db.findBookingIDMatch(bookingIDint, requiredStatus); //guestname, guestid, roomnumber
+            //assign to recentBooking, then return booking
+            try {
+                data.setRecentRoom(new Room(Integer.parseInt(bookingDetails[2]), ""));
+            } catch (NumberFormatException e) {
+                System.out.println("Error converting roomnumber string to int - checkINGuest() in Model.java");
+                listener.checkOutFeedbackMSG(-1);
+            }catch (NullPointerException e) {
+                System.out.println("Error,Booking ID is not valid");
+                listener.checkOutFeedbackMSG(-1);
+                return;
+            }
+            Guest matchingGuest = new Guest(bookingDetails[0], ""); //guestname, guestphone
+            Booking matchingBooking = new Booking(bookingIDint, bookingDetails[0], matchingGuest); //bookingid, guestname, matchingGuest
+            data.setRecentBooking(matchingBooking);   
+
+            notifyListener();
+            listener.checkOutFeedbackMSG(1);            
+        }
+
+    }
+    
     
     public void checkINGuest (String bookingID) {
-        //occupies the room
-    }
-    
-    //Refresh all lists including: Bookings, Guests and Rooms table -> Only updates database -> Data.
-    //Data is always an updated reflection of what's on the database
-    public void refreshLists() {
+        int bookingIDint;
+        try {
+            bookingIDint = Integer.parseInt(bookingID);
+        } catch (NumberFormatException e) {
+            System.out.println("Error converting String to integer");
+            data.setRecentBooking(null);
+            listener.checkInFeedbackMSG(-1);
+            return;           
+        }
+            
+        
+        if (data.isCheckInConfirmed()) { //if true
+            db.checkINGuest(data.getRecentRoom().roomNumber);
+            data.setCheckInFlag(false);
+            data.setCheckInConfirmed(false);
+            fetchData();
+            listener.checkInFeedbackMSG(0);
+
+        } else {
+            int[] targetStatus = new int[] {1,1};
+            data.setCheckInFlag(true);
+            String[] bookingDetails = db.findBookingIDMatch(bookingIDint, targetStatus); //guestname, guestid, roomnumber
+            //assign to recentBooking, then return booking
+            try {
+                data.setRecentRoom(new Room(Integer.parseInt(bookingDetails[2]), ""));
+            } catch (NumberFormatException e) {
+                System.out.println("Error converting roomnumber string to int - checkINGuest() in Model.java");
+                listener.checkInFeedbackMSG(-1);
+            }catch (NullPointerException e) {
+                System.out.println("Error,Booking ID is not valid");
+                listener.checkInFeedbackMSG(-1);
+                return;
+            }
+            Guest matchingGuest = new Guest(bookingDetails[0], ""); //guestname, guestphone
+            Booking matchingBooking = new Booking(bookingIDint, bookingDetails[0], matchingGuest); //bookingid, guestname, matchingGuest
+            data.setRecentBooking(matchingBooking);            
+        }        
         notifyListener();
     }
-    
+ 
+   
+    //Refresh all lists including: Bookings, Guests and Rooms table -> Only updates database -> Data.
+    //Data is always an updated reflection of what's on the database
     private void notifyListener() {
         if (listener != null) {
             listener.onModelUpdate(this.data);
         }
     }
     
-    /* HERE WE ARE SOME METHODS FOR QUERIES TO RETRIEVE DATA FROM DATABASE*/
-    //public void retrieveBookings
-    //public void retrieveGuestsRequests
-    //public void retrieveRoomsList
-    
-    
-    //DOES THIS GO HERE?
-    /* HERE ARE SOME METHODS FOR QUERIES THAT UPDATE DATA ON DATABASE*/
-    //public void updateBookingsList
-    //public void updateGuestsList
-    //public void updateRoomsList
 }
