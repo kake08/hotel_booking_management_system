@@ -28,7 +28,10 @@ public class Data {
     MyTableModel tableModelBookings = new MyTableModel();
     MyTableModel tableModelGuests = new MyTableModel();
     MyTableModel tableModelRooms = new MyTableModel();
-    public String tableBookingsFilter = "All Bookings";
+    
+    public String tableBookingsFilter = "All Bookings";//Default view of tables
+    public String tableGuestsFilter = "All Guests";
+    public String tableRoomsFilter = "All Rooms";
     
     int userMode = -1; //-1 neither, 0 for guest, 1 for staff
     String currentloggeduser = null;

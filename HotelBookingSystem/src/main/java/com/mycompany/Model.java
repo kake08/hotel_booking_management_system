@@ -57,8 +57,8 @@ public class Model {
     //Notifying the listener(view) when data is updated    
     public void fetchData() { 
         db.fetchBookings(data.tableModelBookings, data.tableBookingsFilter);
-        db.fetchGuests(data.tableModelGuests);
-        db.fetchRooms(data.tableModelRooms);
+        db.fetchGuests(data.tableModelGuests, data.tableGuestsFilter);
+        db.fetchRooms(data.tableModelRooms, data.tableRoomsFilter);
         
         notifyListener();           
     }
@@ -102,7 +102,7 @@ public class Model {
             bookingIDint = Integer.parseInt(bookingID);
         } catch (NumberFormatException e) {
             System.out.println("Error converting String to integer");
-            listener.checkOutFeedbackMSG(-1);
+            listener.cancelBookingFeedbackMSG(-1);
             return;
         }
         
@@ -124,10 +124,10 @@ public class Model {
                 data.setRecentRoom(new Room(Integer.parseInt(bookingDetails[2]), ""));
             } catch (NumberFormatException e) {
                 System.out.println("Error converting roomnumber string to int - cancelGuest() in Model.java");
-                listener.checkOutFeedbackMSG(-1);
+                listener.cancelBookingFeedbackMSG(-1);
             }catch (NullPointerException e) {
                 System.out.println("Error,Booking ID is not valid");
-                listener.checkOutFeedbackMSG(-1);
+                listener.cancelBookingFeedbackMSG(-1);
                 return;
             }
             Guest matchingGuest = new Guest(bookingDetails[0], ""); //guestname, guestphone

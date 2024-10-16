@@ -96,8 +96,12 @@ public class Controller implements ActionListener {
                 model.checkOUTGuest(bookingID);
                 break;
             case "comboBoxChanged":
-                String string = (String) view.filterOptions.getSelectedItem();
-                model.data.tableBookingsFilter = string;
+                String filter = (String) view.bookingsFilterOptions.getSelectedItem();
+                model.data.tableBookingsFilter = filter;
+                filter = (String) view.guestsFilterOptions.getSelectedItem();
+                model.data.tableGuestsFilter = filter;
+                filter = (String) view.roomsFilterOptions.getSelectedItem();
+                model.data.tableRoomsFilter = filter;
                 model.fetchData();
                 break;
             case "Cancel Booking":
