@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
@@ -43,13 +44,17 @@ public class View extends JFrame implements ModelListener{
     JPanel staffMenuPanel;
     JPanel guestMenuPanel;
     CardLayout cards;
-    JPanel leftPanel1btnCENTER; //Manage bookings forms
+    JPanel leftPanel1btnCENTER; //Contains Manage bookings forms
     JPanel leftPanel2btnCENTER; //Manage guest forms
+    JPanel leftPanel3btnCENTER;
     CardLayout bookingFormCards;
     CardLayout bookingMSGCards;
-    Integer bookingMode; //1:MANAGE BOOKING 2:MANAGE GUEST 3:MANAGE ROOMS
-//    String strLoginMode;
+    CardLayout guestFormCards;
+    CardLayout roomFormCards;
     
+    Integer bookingMode; //1.Create Booking, 2.CheckIn, 3. CheckOut, 4.CancelBooking
+    Integer guestFormMode; //1.Complete Request 2.Update Phone 3. Send Note
+    Integer roomFormMode; //1.Clean Room 2.Out Of Order
     
     //JPanels
     JPanel tabPanel1; //Staff bookings panel
@@ -64,6 +69,8 @@ public class View extends JFrame implements ModelListener{
     JButton submitbtn1; //CHECK IN BUTTON
     JButton submitbtn2;// CHECK OUT BUTTON
     JButton submitbtn3; //Cancel Booking BUTTON
+    JButton cleanRoomBtn;
+
     
     JButton createBookingBtn;
     
@@ -88,6 +95,9 @@ public class View extends JFrame implements ModelListener{
     JLabel cancelBookingMSG;
     JLabel confirmLbl;
     
+    JLabel bookingMSGtitle;
+    JLabel manageRoomMSG;
+    
     
     //Textbox or Typing fields
     JTextField username;
@@ -97,6 +107,7 @@ public class View extends JFrame implements ModelListener{
     JTextField bookingIDtxf1; //CheckingIn guest
     JTextField bookingIDtxf2; //CheckingOut guest
     JTextField bookingIDtxf3;
+    JTextField roomNumbertxfRF;
     
     //Tables and strlist
     MyTableModel tableModelBookings; // bookings
@@ -124,7 +135,8 @@ public class View extends JFrame implements ModelListener{
         loadLogin();
         loadStaffMenuPanel();        
         loadGuestMenuPanel();
-        loadBookingForms();
+//        loadBookingForms();
+//        loadGuestForms();
         
         cards.show(mainPanel, "STARTPANEL");
         this.add(mainPanel);
@@ -147,6 +159,7 @@ public class View extends JFrame implements ModelListener{
         this.roomsFilterOptions.addActionListener(listener);
         this.submitbtn2.addActionListener(listener);
         this.submitbtn3.addActionListener(listener);
+        this.cleanRoomBtn.addActionListener(listener);
     }
      
     //initializes frame 
@@ -163,7 +176,11 @@ public class View extends JFrame implements ModelListener{
         mainPanel.setLayout(cards);
         bookingFormCards = new CardLayout();
         bookingMSGCards = new CardLayout();
+        guestFormCards = new CardLayout();
+        roomFormCards = new CardLayout();
         bookingMode = -1; 
+        guestFormMode = -1;
+        roomFormMode = -1;
         
         //Start Up Panel
         startPanel = new JPanel();
@@ -543,7 +560,7 @@ public class View extends JFrame implements ModelListener{
         JPanel successMSGCard = new JPanel();
         successMSGCard.setLayout(new GridBagLayout());       
         
-        JLabel title = new JLabel("Booking Confirmed!");
+        bookingMSGtitle = new JLabel("Booking Confirmed!");
         guestNameLabel = new JLabel("GuestName: "+ data.getRecentBooking().getGuest().guestName);
         roomLabel = new JLabel("Room: " + data.getRecentBooking().getRoom().roomNumber + "Roomtype: " + data.getRecentBooking().getRoom().roomType);
         bookingNoLabel = new JLabel("Room: " + data.getRecentBooking().getBookingID());
@@ -551,7 +568,7 @@ public class View extends JFrame implements ModelListener{
         
         //Adding message components to panel
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridheight = 1; gbc.gridwidth = 1;
-        successMSGCard.add(title, gbc);
+        successMSGCard.add(bookingMSGtitle, gbc);
         gbc.gridy = 1;
         successMSGCard.add(guestNameLabel, gbc);
         gbc.gridy = 2;
@@ -713,7 +730,7 @@ public class View extends JFrame implements ModelListener{
         leftPanel1MessageBOTTOM.setLayout(bookingMSGCards);
                
               
-        //Adding Top, CENTER and Bottom Subcontainer Panels into left split pane
+        //Adding Top, CENTER and Bottom Subcontainer Panels into left split panel
         leftPanel1.add(leftPanel1btnTOP, BorderLayout.NORTH);
         leftPanel1.add(leftPanel1btnCENTER, BorderLayout.CENTER);
         leftPanel1.add(leftPanel1MessageBOTTOM, BorderLayout.SOUTH);
@@ -825,14 +842,17 @@ public class View extends JFrame implements ModelListener{
         JPanel leftPanel2btnTOP = new JPanel();
         leftPanel2btnTOP.setLayout(new GridLayout(3,2)); //3 by 2 menu components
         leftPanel2btnCENTER = new JPanel();
-//        leftPanel2btnCENTER.setLayout(bookingFormCards); //Setting as cards layout
+        leftPanel2btnCENTER.setLayout(guestFormCards); //Setting as cards layout
+        JPanel leftPanel2MessageBOTTOM = new JPanel();
+        leftPanel2MessageBOTTOM.setLayout(new FlowLayout());
         
-        //Adding Top and Bottom Panels into left split Panel
+        //Adding Top and Center Panels into left split Panel
         leftPanel2.add(leftPanel2btnTOP, BorderLayout.NORTH);
         leftPanel2.add(leftPanel2btnCENTER, BorderLayout.CENTER);
-        loadBookingForms();
+        leftPanel2.add(leftPanel2MessageBOTTOM, BorderLayout.SOUTH);
+        loadGuestForms();
         
-        //Adding buttons to left splitpane, North Border
+        //Adding COMBOBOX to left splitpane, North Border
         JLabel northBtnTitle2 = new JLabel("Filter Guest: ");
         String[] strFilterOptions = new String[]{"All Guests", "Active Guests", "Inactive Guests", "Guests with Request"};
         guestsFilterOptions = new JComboBox<String>(strFilterOptions);
@@ -840,11 +860,52 @@ public class View extends JFrame implements ModelListener{
         leftPanel2btnTOP.add(northBtnTitle2);
         leftPanel2btnTOP.add(guestsFilterOptions);
         
-        //Adding buttons to left splitpane, CENTRAL border for options
-        JButton completeBtn = new JButton("Complete Request");
-            //Would be ideal to link functionality between left and right split panels.
-            
-        leftPanel2btnTOP.add(completeBtn);
+        //Adding buttons to left splitpane, TOP border for options
+        JButton completeReq = new JButton("Complete Request");
+        completeReq.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (guestFormMode == 1) {
+                    guestFormCards.show(leftPanel2btnCENTER, "CLEARFORM");
+                    guestFormMode = -1;
+                    return;
+                }
+                guestFormCards.show(leftPanel2btnCENTER, "COMPLETEREQFORM");
+                guestFormMode = 1;
+            }
+//            
+        });
+        JButton updatePhone = new JButton("Update Phone");
+        updatePhone.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (guestFormMode == 2){
+                    guestFormCards.show(leftPanel2btnCENTER, "CLEARFORM");
+                    guestFormMode = -1;
+                    return;
+                }
+                guestFormCards.show(leftPanel2btnCENTER, "UPDATEPHONEFORM");
+                guestFormMode = 2;
+            }
+//            
+        });        
+        JButton sendNote = new JButton("Send Note");
+        sendNote.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (guestFormMode == 3) {
+                    guestFormCards.show(leftPanel2btnCENTER, "CLEARFORM");
+                    guestFormMode = -1;
+                    return;
+                }
+                guestFormCards.show(leftPanel2btnCENTER, "SENDNOTEFORM");
+                guestFormMode = 3;
+            }
+//            
+        });
+        leftPanel2btnTOP.add(completeReq);
+        leftPanel2btnTOP.add(updatePhone);
+        leftPanel2btnTOP.add(sendNote);
         
         //Initializing Table model which reflects Guest records
 //        String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
@@ -865,6 +926,99 @@ public class View extends JFrame implements ModelListener{
         tabPanel2.add(tabPanel2Inner, BorderLayout.CENTER);
     }
     
+    private void loadGuestForms() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        
+    //1.Empty Panel
+        JPanel clearForm = new JPanel();
+        leftPanel2btnCENTER.add(clearForm, "CLEARFORM");
+        
+    //2.Complete Request Panel - initialize components
+        JPanel completeReqForm = new JPanel();
+        completeReqForm.setLayout(new GridBagLayout());
+        JLabel label1 = new JLabel("Enter Guest Request Details: ");
+        JLabel guestID = new JLabel("Guest ID: ");
+        JTextField guestIDtxfGF = new JTextField(10);
+        JButton checkRequestsBtn = new JButton("Check Requests"); //Finds requests, creates forms that allows completion of request
+        
+        //Adding form components to panel
+        gbc.gridx = 0; gbc.gridy = 0;
+        completeReqForm.add(label1, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        completeReqForm.add(guestID, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        completeReqForm.add(guestIDtxfGF, gbc);
+        gbc.gridx = 1; gbc.gridy = 2;
+        completeReqForm.add(checkRequestsBtn, gbc);
+        leftPanel2btnCENTER.add(completeReqForm, "COMPLETEREQFORM");
+        
+    //3.Update Phone Panel 
+        JPanel updatePhoneForm = new JPanel();
+        updatePhoneForm.setLayout(new GridBagLayout());
+        JLabel label2 = new JLabel("Update Phone Number: ");
+        JLabel guestID2 = new JLabel("GuestID: ");
+        JTextField guestID2txf = new JTextField(10);
+        JLabel oldPhoneNo = new JLabel("Old Phone Number: ");
+        JTextField oldPhoneNotxf = new JTextField(10);
+        JLabel newPhoneNo = new JLabel("New Phone Number: ");
+        JTextField newPhoneNotxf = new JTextField(10);
+        JButton updatePhoneBtn = new JButton("Update Phone Number");
+        
+        //Adding form components to panel
+        gbc.gridx = 0; gbc.gridy = 0;
+        updatePhoneForm.add(label2, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        updatePhoneForm.add(guestID2, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        updatePhoneForm.add(guestID2txf, gbc);
+        gbc.gridx = 0; gbc.gridy = 2;
+        updatePhoneForm.add(oldPhoneNo, gbc);
+        gbc.gridx = 1; gbc.gridy = 2;
+        updatePhoneForm.add(oldPhoneNotxf, gbc);
+        gbc.gridx = 0; gbc.gridy = 3;
+        updatePhoneForm.add(newPhoneNo, gbc);
+        gbc.gridx = 1; gbc.gridy = 3;
+        updatePhoneForm.add(newPhoneNotxf, gbc);
+        gbc.gridx = 1; gbc.gridy = 4;
+        updatePhoneForm.add(updatePhoneBtn, gbc);
+        leftPanel2btnCENTER.add(updatePhoneForm, "UPDATEPHONEFORM");
+        
+    //4.Send Note Panel
+        JPanel sendNoteForm = new JPanel();
+        sendNoteForm.setLayout(new GridBagLayout());
+        JLabel label3 = new JLabel("Send Note to Guest: ");
+        JLabel guestID3 = new JLabel("Guest ID: ");
+        JTextField guestID3txf = new JTextField(10);
+        JLabel regardBookingID = new JLabel("Related Booking ID: ");
+        JTextField regardBookingIDtxf = new JTextField(10);
+        JLabel customMessageLbl = new JLabel("Note: ");
+        JTextArea customNotetxf = new JTextArea(5,20);
+        JScrollPane customNoteSP = new JScrollPane(customNotetxf);
+        JButton sendNote = new JButton("Send Note");
+        
+        gbc.gridx = 0; gbc.gridy = 0;
+        sendNoteForm.add(label3, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        sendNoteForm.add(guestID3, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        sendNoteForm.add(guestID3txf, gbc);
+        gbc.gridx = 0; gbc.gridy = 2;
+        sendNoteForm.add(regardBookingID, gbc);
+        gbc.gridx = 1; gbc.gridy = 2;
+        sendNoteForm.add(regardBookingIDtxf, gbc);
+        gbc.gridx = 0; gbc.gridy = 3;
+        sendNoteForm.add(customMessageLbl, gbc);
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridheight = 3; gbc.gridwidth = 2;
+        sendNoteForm.add(customNoteSP, gbc);
+        gbc.gridx = 1; gbc.gridy = 7;
+        sendNoteForm.add(sendNote, gbc);
+        leftPanel2btnCENTER.add(sendNoteForm, "SENDNOTEFORM");
+        
+        guestFormCards.show(leftPanel2btnCENTER, "CLEARFORM");
+        
+    }
+    
     //Loads the Manage Rooms tabPanel contents
     private void loadManageRooms(JPanel tabPanel3) {
         
@@ -875,9 +1029,9 @@ public class View extends JFrame implements ModelListener{
         leftPanel3.setLayout(new BorderLayout());
         
         JPanel leftPanel3btnTOP = new JPanel();
-        leftPanel3btnTOP.setLayout(new GridLayout(3,2));
-        JPanel leftPanel3btnCENTER = new JPanel();
-//        leftPanel3btnCENTER.setLayout(manageRoomCards); //TODO
+        leftPanel3btnTOP.setLayout(new GridLayout(2,2));
+        leftPanel3btnCENTER = new JPanel();
+        leftPanel3btnCENTER.setLayout(roomFormCards); 
         leftPanel3MessageBOTTOM = new JPanel();
         leftPanel3MessageBOTTOM.setLayout(new FlowLayout());
         
@@ -886,14 +1040,10 @@ public class View extends JFrame implements ModelListener{
         leftPanel3.add(leftPanel3btnTOP, BorderLayout.NORTH);
         leftPanel3.add(leftPanel3btnCENTER, BorderLayout.CENTER);
         leftPanel3.add(leftPanel3MessageBOTTOM, BorderLayout.SOUTH);
-//        loadRoomForms(); //todo
-
-//        Adding label for user feedback to left split pane, bottom border
-        JLabel manageRoomMSG = new JLabel("manageRoomMSG to leftPanel3BOTTOM");
-        leftPanel3MessageBOTTOM.add(manageRoomMSG);
+        loadRoomForms();
         
-        //Adding buttons to left splitpane, North border
-        JLabel northBtnTitle3 = new JLabel("Filter Rooms List: ");
+        //Adding JCOMBOBOX to left splitpane, North border
+        JLabel northBtnTitle3 = new JLabel("Filter Rooms: ");
         String[] strFilterOptions = new String[]{"All Rooms", "Available Rooms", "N/A Rooms", 
             "N/A Rooms - Occupied", "N/A Rooms - Booked", "N/A Rooms - Need Cleaning"};
         roomsFilterOptions = new JComboBox<String>(strFilterOptions);
@@ -901,7 +1051,47 @@ public class View extends JFrame implements ModelListener{
         leftPanel3btnTOP.add(northBtnTitle3);
         leftPanel3btnTOP.add(roomsFilterOptions);
                
-//        Initializing table model which reflects booking records
+        //Adding buttons to left splitpane, TOP border for options
+        JButton cleanRoombtn = new JButton("Clean Room");
+        cleanRoombtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (roomFormMode == 1) {
+                    roomFormCards.show(leftPanel3btnCENTER, "CLEARFORM");
+                    manageRoomMSG.setText("");
+                    roomFormMode = -1;
+                    return;
+                }
+                roomFormCards.show(leftPanel3btnCENTER, "CLEANROOMFORM");
+                manageRoomMSG.setText("");
+                roomFormMode = 1;
+            }
+        });
+        
+        JButton OOObtn = new JButton("Out of Order");
+        OOObtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (roomFormMode == 2) {
+                    roomFormCards.show(leftPanel3btnCENTER, "CLEARFORM");
+                    manageRoomMSG.setText("");
+                    roomFormMode = -1;
+                    return;
+                }
+                roomFormCards.show(leftPanel3btnCENTER, "OOOFORM");
+                manageRoomMSG.setText("");
+                roomFormMode = 2;
+            }
+        });
+        
+        leftPanel3btnTOP.add(cleanRoombtn);
+        leftPanel3btnTOP.add(OOObtn);
+        
+        // Adding label for user feedback to left split pane, bottom border
+        manageRoomMSG = new JLabel("");
+        leftPanel3MessageBOTTOM.add(manageRoomMSG);
+        
+        //Initializing table model which reflects booking records
             tableModelRooms = new MyTableModel();
             roomsTable = new JTable(tableModelRooms){
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
@@ -920,12 +1110,65 @@ public class View extends JFrame implements ModelListener{
                 
     }
     
+    private void loadRoomForms() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        //1.Empty Panel
+        JPanel clearForm = new JPanel();
+        leftPanel3btnCENTER.add(clearForm, "CLEARFORM");
+        
+        //2.Clean Room form
+        JPanel cleanRoomForm = new JPanel();
+        cleanRoomForm.setLayout(new GridBagLayout());
+        JLabel cleanRoomLbl = new JLabel("Enter Room Detail: ");
+        JLabel roomNumber = new JLabel("Room Number: "); // must be roomstatus 3
+        roomNumbertxfRF = new JTextField(10);
+        cleanRoomBtn = new JButton("Clean Room");
+        
+        //Adding Form components to panel
+        gbc.gridx = 0; gbc.gridy = 0;
+        cleanRoomForm.add(cleanRoomLbl, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        cleanRoomForm.add(roomNumber, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        cleanRoomForm.add(roomNumbertxfRF, gbc);
+        gbc.gridx = 1; gbc.gridy = 2;
+        cleanRoomForm.add(cleanRoomBtn, gbc);
+        leftPanel3btnCENTER.add(cleanRoomForm, "CLEANROOMFORM");
+        
+        //3. Out of Order Form
+        JPanel OOOForm = new JPanel();
+        OOOForm.setLayout(new GridBagLayout());
+        JLabel OOOLbl = new JLabel("Enter Room Detail: ");
+        JLabel roomNumberLbl = new JLabel("Room Number: "); //must be roomstatus 3 or 0;
+        JTextField roomNumbertxf = new JTextField(10);
+        JButton setOOOBtn = new JButton("Set as Out of Order");
+        
+        gbc.gridx = 0; gbc.gridy = 0;
+        OOOForm.add(OOOLbl, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        OOOForm.add(roomNumberLbl, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        OOOForm.add(roomNumbertxf, gbc);
+        gbc.gridx = 1; gbc.gridy = 2;
+        OOOForm.add(setOOOBtn, gbc);
+        leftPanel3btnCENTER.add(OOOForm, "OOOFORM");
+        
+        roomFormCards.show(leftPanel3btnCENTER, "CLEARFORM");
+        
+    }
+    
 //    -----------------------------END OF STAFF MANAGEMENT PANELS------------------------------------------------------------------------------
     @Override
     public void createBookingFeedbackMSG(int output) {
         if (output == -1) {
             cancelBookingMSG.setText("Please enter valid booking details");
             bookingMSGCards.show(leftPanel1MessageBOTTOM, "CANCELBOOKMSG");
+        }
+        else if (output == 0) {
+            guestNametxf.setText("");
+            numTxf.setText("");
         }
     }
     
@@ -976,6 +1219,18 @@ public class View extends JFrame implements ModelListener{
             bookingMSGCards.show(leftPanel1MessageBOTTOM, "CHECKOUTMSG");
             bookingFormCards.show(leftPanel1btnCENTER, "CHECKINFORM");
             data.setCheckInConfirmed(false); //end of check in
+        }
+    }
+    
+    @Override
+    public void cleanRoomFeedbackMSG(int output) {
+        if (output == -1) {
+            manageRoomMSG.setText("Please enter a valid Room Number");           
+        } else if (output == 0) {
+            manageRoomMSG.setText("Success! Room has been set as cleaned");
+            //success
+        } else if (output == 1) {
+            manageRoomMSG.setText("Room does not need cleaning");
         }
     }
     
@@ -1044,20 +1299,22 @@ public class View extends JFrame implements ModelListener{
     private String[] setManageBookingMSG(Data data){      
         String[] output = null;
         if (data.isBookingSuccess()){        
+        bookingMSGtitle.setText("Booking successful!");
         bookingNoLabel.setText("Booking ID: " + data.getRecentBooking().getBookingID());
         roomLabel.setText("Room Number:" + data.getRecentRoom().roomNumber + "; " + data.getRecentRoom().roomType);
         guestNameLabel.setText("Guest ID: " + data.getRecentGuest().getGuestID() + " Guest Name: " + data.getRecentGuest().guestName);
-        
-        this.bookingMSGCards.show(leftPanel1MessageBOTTOM, "SUCCESSMSG");
         } else if (!data.isBookingSuccess()) {
+            bookingMSGtitle.setText("");
             bookingNoLabel.setText("No Room Available for that RoomType. Try Again.");
             roomLabel.setText("");
-            guestNameLabel.setText("");
+            guestNameLabel.setText("");          
         }
+        this.bookingMSGCards.show(leftPanel1MessageBOTTOM, "SUCCESSMSG");
         data.setBookingFlag(false);
         
         return output;
     }
+    
     
     public void setUserMode(int userMode) {
         if (userMode == 0) { //guest

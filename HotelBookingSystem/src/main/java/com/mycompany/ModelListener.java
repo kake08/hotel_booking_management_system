@@ -9,6 +9,8 @@ package com.mycompany;
  * @author DeanK
  */
 public interface ModelListener {
+    
+    //Manage Bookings
     void onModelUpdate(Data data);
     
     void checkInFeedbackMSG(int output);
@@ -18,4 +20,8 @@ public interface ModelListener {
     void cancelBookingFeedbackMSG(int output);
     
     void createBookingFeedbackMSG(int output);
+    
+    
+    //Manage Rooms
+    void cleanRoomFeedbackMSG(int output);
 }

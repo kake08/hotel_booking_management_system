@@ -80,7 +80,7 @@ public class Model {
         //if (no matches) else(matches -> feed the guestID to method)
         Guest guest = db.matchingGuestExist(guestName, guestPhone); //-1 is null, other number is the matching guest ID
         if (guest == null) {
-            data = db.createBooking(guestName, guestPhone, selectedRoomType, -1, data);//failed the booking process
+            data = db.createBooking(guestName, guestPhone, selectedRoomType, -1, data);//no existing guest found in database
 
         } else {
             //creates a booking for a existing guest
@@ -92,10 +92,10 @@ public class Model {
             return;
         }        
         fetchData(); //refreshes table view
+        listener.createBookingFeedbackMSG(0);
         notifyListener();
     }
    
-    
     public void cancelBooking(String bookingID) {
         int bookingIDint;
         try {
@@ -141,8 +141,7 @@ public class Model {
         
         
     }
-    
-    
+     
     public void checkOUTGuest (String bookingID) {
         int bookingIDint;
         try {
@@ -188,8 +187,7 @@ public class Model {
         }
 
     }
-    
-    
+      
     public void checkINGuest (String bookingID) {
         int bookingIDint;
         try {
@@ -231,6 +229,45 @@ public class Model {
         notifyListener();
     }
  
+    public void houseKeepRoom(String roomNumber) {
+//        int roomNumberInt; 
+//        try {
+//            roomNumberInt = Integer.parseInt(roomNumber);
+//            
+//        }catch(NumberFormatException e) {
+//            System.out.println("Error converting String to integer in cleanRoom in Model.java" + e.getMessage());
+//            listener.housekeepFeedbackMSG(-1);
+//            return;
+//        }
+//        
+//        boolean isCleaned = db.cleanRoom(roomNumberInt);
+//        if (isCleaned) { //Success cleaning message
+//            listener.housekeepFeedbackMSG(0);
+//        } else { //Room does not need cleaning
+//            listener.housekeepFeedbackMSG(1);
+//        }
+//        fetchData();
+    }
+    
+    public void cleanRoom (String roomNumber) {
+        int roomNumberInt; 
+        try {
+            roomNumberInt = Integer.parseInt(roomNumber);
+            
+        }catch(NumberFormatException e) {
+            System.out.println("Error converting String to integer in cleanRoom in Model.java" + e.getMessage());
+            listener.cleanRoomFeedbackMSG(-1);
+            return;
+        }
+        
+        boolean isCleaned = db.cleanRoom(roomNumberInt);
+        if (isCleaned) { //Success cleaning message
+            listener.cleanRoomFeedbackMSG(0);
+        } else { //Room does not need cleaning
+            listener.cleanRoomFeedbackMSG(1);
+        }
+        fetchData();
+    }
    
     //Refresh all lists including: Bookings, Guests and Rooms table -> Only updates database -> Data.
     //Data is always an updated reflection of what's on the database

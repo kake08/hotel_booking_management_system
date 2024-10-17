@@ -58,7 +58,7 @@ public class Database {
                 if(!checkTableExisting(listName2)) {
                     statement.executeUpdate("CREATE TABLE " + listName2 + " (guestID int not null, "
                     + "guestName varchar(20), guestPhone varchar(20), guestStatus int)");
-                    statement.executeUpdate("INSERT INTO GUESTS (GUESTID, GUESTNAME, GUESTPHONE) VALUES (0, 'qwe', '98989')");
+//                    statement.executeUpdate("INSERT INTO GUESTS (GUESTID, GUESTNAME, GUESTPHONE) VALUES (0, 'qwe', '98989')");
                 }
                 //Check if ROOMS table exists yet
                 if(!checkTableExisting(listName3)) {
@@ -66,7 +66,6 @@ public class Database {
                     + "roomType varchar(20), roomStatus int not null)"); 
                     for (int i = 1; i < 11; i++) {
                         statement.executeUpdate("INSERT INTO ROOMS (ROOMNUMBER, ROOMTYPE, ROOMSTATUS) VALUES (" + i + ", 'STANDARD', 0)");
-//                        INSERT INTO pdc.ROOMS (ROOMNUMBER, ROOMTYPE, ROOMSTATUS) VALUES (0, 'Standard', 0);
                     }
                     for (int i = 11; i < 21; i++) {
                         statement.executeUpdate("INSERT INTO ROOMS (ROOMNUMBER, ROOMTYPE, ROOMSTATUS) VALUES (" + i + ", 'DELUXE', 0)");
@@ -172,22 +171,16 @@ public class Database {
     public Data checkGuestLogin(String username, String password, Data data) {
         try {
             Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT guestName, GUESTPHONE FROM GUESTS"
-            + " WHERE guestName = '" + username + "'");
-            if (rs.next()) {
-                String pw = rs.getString("GUESTPHONE");
-                System.out.println("User found\n Checking valid login......");
-                if (password.compareTo(pw) == 0) {
-                    System.out.println("Successfully logged In! Loading guest Menu.....");
-                    data.currentloggeduser = rs.getString("GUESTNAME");
-                    data.loginFlag = true;
-                    return data;
-                }
-                else {
-                    System.out.println("Invalid login - check your password");
-                }
+            ResultSet rs = statement.executeQuery("SELECT guestName, GUESTPHONE, guestID FROM GUESTS"
+            + " WHERE guestName = '" + username + "' AND guestphone = '" + password + "'");
+            if (rs.next()) { //guest with matching details has been found
+                System.out.println("Successfully logged In! Loading guest Menu.....");
+                data.currentloggeduser = rs.getString("GUESTNAME");
+                data.currentloggedGuestID = rs.getInt("GUESTID"); // Used to find guest's booking data
+                data.loginFlag = true;
+                return data;         
             } else {
-                System.out.println("Invalid Guest Login - Username does not exist");
+                System.out.println("Invalid Guest Login - Username does not exist/Wrong password");
             }
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
@@ -246,18 +239,16 @@ public class Database {
         Room newRoom;
         Booking newBooking;
         Guest newGuest;
-        
-        
-        
+          
         int assignedRoomNumber = fetchAvailableRoom(roomType);
         if (assignedRoomNumber == -1) { //no room available of this room type
             data.setBookingSuccess(false);
             return data;
 //            return false;
         }
-        newRoom = new Room(assignedRoomNumber, roomType);
-
         
+        newRoom = new Room(assignedRoomNumber, roomType);
+       
         try {
             PreparedStatement pstmt;
             int bookingRowCount = getRecordCount("BOOKINGS");
@@ -277,6 +268,7 @@ public class Database {
                 Statement statement = conn.createStatement();
                 statement.executeUpdate("UPDATE guests SET gueststatus = 20 WHERE guestID = " + guestID + " AND gueststatus = 1");
                 guestRowCount = guestID;
+                statement.close();
             }
             
             newGuest = new Guest(guestName, guestPhone);
@@ -285,10 +277,10 @@ public class Database {
 
             pstmt = conn.prepareStatement("INSERT INTO BOOKINGS (Bookingid, guestname, guestId, bookingstatus, roomnumber)"
                     + "VALUES (?,?,?,?,?)");
-            pstmt.setInt (1, bookingRowCount); //99 as test bookingid
+            pstmt.setInt (1, bookingRowCount); //bookingid
             pstmt.setString (2, guestName); //guestname
             pstmt.setInt(3, guestRowCount); //guestid
-            pstmt.setInt(4, 1); //set as pending booking
+            pstmt.setInt(4, 1); //BookingStatus: set as pending booking
             pstmt.setInt(5, assignedRoomNumber); //test roomnumber
             pstmt.executeUpdate();
             
@@ -425,6 +417,7 @@ public class Database {
         tableModel.updateTableModelData(rowData, columnNames);
     }
         
+    //Find the guest with matching room number
     private String findMatchGuestwithRoom(int roomNumber) {
         String guestDetails = "null";
         
@@ -480,7 +473,25 @@ public class Database {
             while(rs.next()){
                 Vector<Object> row = new Vector<Object>();
                 for (int i = 1; i <= numColumns; i++) {
-                    row.add(rs.getObject(i));
+                    if (i == 4) {
+                        int status = rs.getInt("GUESTSTATUS");
+                        switch(status) {
+                            case 1:
+                                row.add("INACTIVE");
+                                break;
+                            case 20: 
+                                row.add("ACTIVE");
+                                break;
+                            case 21:
+                                row.add("ACTIVE - pending request");
+                                break;
+                            default:
+                                row.add("Status Error");
+                                break;
+                        }
+                    } else {
+                        row.add(rs.getObject(i));
+                    }                   
                 }
                 rowData.add(row);
             }
@@ -519,7 +530,7 @@ public class Database {
                     System.out.println("Filter Historical Bookings");
                     break;
                 default:
-                    rs = statement.executeQuery("SELECT * FROM bookings"); //ALL BOOKINGS PRINTED
+                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus != -1"); //ALL BOOKINGS PRINTED except deleted/cancelled bookings
                     System.out.println("Filter All Bookings");
                     break;
             }
@@ -537,7 +548,25 @@ public class Database {
             while(rs.next()){
                 Vector<Object> row = new Vector<Object>();
                 for (int i = 1; i <= numColumns; i++) {
-                    row.add(rs.getObject(i));
+                    if (i == 4) {
+                        int status = rs.getInt("BOOKINGSTATUS");
+                        switch(status) {
+                            case 1: 
+                                row.add("Pending");
+                                break;
+                            case 2:
+                                row.add("Active");
+                                break;
+                            case 3:
+                                row.add("Historical");
+                                break;
+                            default:
+                                row.add("Status error");
+                                break;
+                        }
+                    }else {
+                        row.add(rs.getObject(i));
+                    }                    
                 }
                 rowData.add(row);
             }
@@ -554,9 +583,12 @@ public class Database {
     public boolean cancelBooking(int roomnumber) {
         System.out.println("Cancelling booking in database...");
         try {
+            int guestID = findGuestIDwithRoomNo(roomnumber);
             Statement statement = conn.createStatement();
+            statement.executeUpdate("UPDATE bookings SET bookingstatus = -1 WHERE roomnumber = " + roomnumber  + " AND bookingstatus = 1"); //1 = pending booking
             statement.executeUpdate("UPDATE rooms SET roomstatus = 0 WHERE roomnumber = " + roomnumber);
-            statement.executeUpdate("DELETE FROM bookings WHERE roomnumber = " + roomnumber);
+            setGuestIDStatus(guestID);
+            
             statement.close();
             System.out.println("Successfully cancelled booking");
             return true;
@@ -571,8 +603,8 @@ public class Database {
         try {
             int guestID = findGuestIDwithRoomNo(roomnumber);
             Statement statement = conn.createStatement();
+            statement.executeUpdate("UPDATE bookings SET bookingstatus = 3 WHERE roomnumber = " + roomnumber + " AND bookingstatus = 2");
             statement.executeUpdate("UPDATE rooms SET roomstatus = 3 WHERE roomnumber = " + roomnumber);
-            statement.executeUpdate("UPDATE bookings SET bookingstatus = 3 WHERE roomnumber = " + roomnumber);
             setGuestIDStatus(guestID); 
             
             statement.close();
@@ -603,18 +635,18 @@ public class Database {
         return guestID;
     }
     
-    //Checks for active bookings - all bookings are historical, then set Guest status to inactive = 1
+    //Checks for active bookings - if all bookings are historical/cancelled, then set Guest status to inactive = 1
     private boolean setGuestIDStatus(int guestID) {
         try {
             Statement statement = conn.createStatement();
-            //find matching guestid with roomnumber
-            ResultSet rs = statement.executeQuery("SELECT bookingID FROM bookings WHERE guestid = " + guestID + " AND bookingstatus != 3");
+            //Check if active bookings exists - not including historical and cancelled bookings 
+            ResultSet rs = statement.executeQuery("SELECT bookingID FROM bookings WHERE guestid = " + guestID + " AND bookingstatus != 3 AND bookingstatus !=-1"); 
             if (!rs.next()) {
                 System.out.println("No active bookings");
-//                UPDATE guests SET gueststatus = 1 WHERE guestid = 3
                 statement.executeUpdate("UPDATE guests SET gueststatus = 1 WHERE guestid = " + guestID);
                 return false;
             };
+            rs.close();
         }catch (SQLException e) {
             System.out.println("SQLException in setGuestIDStatus after checkout:" + e.getMessage());
         } catch(NullPointerException e) {
@@ -628,13 +660,15 @@ public class Database {
         try {
             Statement statement = conn.createStatement();
             statement.executeUpdate("UPDATE rooms SET roomstatus = 20 WHERE roomnumber = " + roomnumber);
-            statement.executeUpdate("UPDATE bookings SET bookingstatus = 2 WHERE roomnumber = " + roomnumber);
+            statement.executeUpdate("UPDATE bookings SET bookingstatus = 2 WHERE roomnumber = " + roomnumber + " AND bookingstatus = 1");
             statement.close();
             System.out.println("Success checking in Guest");
             return true;
         } catch (SQLException e) {
             System.out.println("SQLException in checkInGUest Database.java: " + e.getMessage());
-        }       
+        } catch (NullPointerException e) {
+            System.out.println("NullPointerException in checkINGuest in database.java: " + e.getMessage());
+        }
         return false;
     }
 
@@ -670,6 +704,31 @@ public class Database {
         return bookingDetails;
     }
     
-    
+    public boolean cleanRoom(int roomnumber) {
+        
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT roomstatus FROM rooms WHERE roomnumber = " + roomnumber);
+            rs.next();
+            int roomstatus = rs.getInt("ROOMSTATUS");
+            if (roomstatus == 3) {
+                statement.executeUpdate("UPDATE rooms SET roomstatus = 0 WHERE roomstatus = 3 AND roomnumber = " + roomnumber);            
+            } else if (roomstatus == 21) {
+                statement.executeUpdate("UPDATE rooms SET roomstatus = 20 WHERE roomstatus = 21 AND roomnumber = " + roomnumber);
+            } else {
+                rs.close();
+                statement.close();
+                return false;
+            }     
+            rs.close();
+            statement.close();
+
+        } catch (SQLException e) {
+            System.out.println("SQLExceptin in cleanRoom database.java: " + e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println("NullPointerException in cleanRoom database.java: " + e.getMessage());
+        }
+        return true;
+    }
     
 }

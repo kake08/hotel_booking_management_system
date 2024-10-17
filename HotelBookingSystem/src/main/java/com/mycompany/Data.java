@@ -34,7 +34,8 @@ public class Data {
     public String tableRoomsFilter = "All Rooms";
     
     int userMode = -1; //-1 neither, 0 for guest, 1 for staff
-    String currentloggeduser = null;
+    String currentloggeduser = null; //String for guestname
+    int currentloggedGuestID = -1;
 
     //used for functions
     

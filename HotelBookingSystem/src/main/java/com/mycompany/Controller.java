@@ -115,6 +115,11 @@ public class Controller implements ActionListener {
                 bookingID = view.bookingIDtxf3.getText();
                 model.cancelBooking(bookingID);
                 break;
+            case "Clean Room":
+                System.out.println("Setting room as cleaned...");
+                String roomNumber = view.roomNumbertxfRF.getText();
+                model.cleanRoom(roomNumber);
+                break;
             default:
                 break;
         }
