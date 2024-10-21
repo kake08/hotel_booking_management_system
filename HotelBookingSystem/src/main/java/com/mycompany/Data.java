@@ -4,9 +4,6 @@
  */
 package com.mycompany;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -14,8 +11,6 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Data { 
 
-//collective for different data collections?
-    //A data structure for bookings e.g. arraylists
     boolean loginFlag = false;
     
     private boolean bookingFlag = false;
@@ -28,17 +23,17 @@ public class Data {
     MyTableModel tableModelBookings = new MyTableModel();
     MyTableModel tableModelGuests = new MyTableModel();
     MyTableModel tableModelRooms = new MyTableModel();
+    String[] myBookingsListstr;
     
-    public String tableBookingsFilter = "All Bookings";//Default view of tables
-    public String tableGuestsFilter = "All Guests";
-    public String tableRoomsFilter = "All Rooms";
+    
+    public String tableBookingsFilter = "All Bookings";//Default view of Booking table
+    public String tableGuestsFilter = "All Guests"; //Default view of Guest Table
+    public String tableRoomsFilter = "All Rooms"; //Default view of Rooms Table
+    public String listMyBookingsFilter = "Active Bookings"; 
     
     int userMode = -1; //-1 neither, 0 for guest, 1 for staff
     String currentloggeduser = null; //String for guestname
-    int currentloggedGuestID = -1;
-
-    //used for functions
-    
+    int currentloggedGuestID = -1; //    
     
     private Booking recentBooking;
     private Guest recentGuest = new Guest("null", "null");
@@ -48,13 +43,6 @@ public class Data {
         this.recentBooking = new Booking(-1, "No Recent Guest", getRecentGuest());
         this.recentBooking.setRoom(recentRoom);
     }
-    
-    
-    
-    
-    
-    
-    
     
     
         /**

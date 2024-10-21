@@ -13,7 +13,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -23,7 +22,6 @@ public class Database {
     
     private static final String dbusername = "pdc";
     private static final String dbpassword = "pdc";
-//    private static final String url = "jdbc:derby://localhost:1527/HotelDB;create=true";
     private static final String url = "jdbc:derby:HotelDB;create=true";
     Connection conn = null;
     
@@ -36,6 +34,8 @@ public class Database {
     //Guests table: guestID;guestName
     //Rooms table: roomNumber; roomType; roomStatus (0 vacant, 1 occupied, 2 needcleaning
     //Guest request: bookingID; requestType; description; - single booking ID can have multiple requests
+    
+    //Create connection with Database. On initial startup, create tables if it doesn't exist.
     public void establishConnection() {
         if (this.conn == null) {
             try {
@@ -58,7 +58,6 @@ public class Database {
                 if(!checkTableExisting(listName2)) {
                     statement.executeUpdate("CREATE TABLE " + listName2 + " (guestID int not null, "
                     + "guestName varchar(20), guestPhone varchar(20), guestStatus int)");
-//                    statement.executeUpdate("INSERT INTO GUESTS (GUESTID, GUESTNAME, GUESTPHONE) VALUES (0, 'qwe', '98989')");
                 }
                 //Check if ROOMS table exists yet
                 if(!checkTableExisting(listName3)) {
@@ -74,14 +73,12 @@ public class Database {
                         statement.executeUpdate("INSERT INTO ROOMS (ROOMNUMBER, ROOMTYPE, ROOMSTATUS) VALUES (" + i + ", 'SUITE', 0)");
                     }
                     
-                }
-               
+                }              
                 //Check if guest request table exists yet
                 if(!checkTableExisting(listName4)) { 
                     statement.executeUpdate("CREATE TABLE " + listName4 + " (bookingID int not null, guestID int not null,"
                     + "requestType int, description varchar(100))");
-                }
-                
+                }               
                 if(!checkTableExisting(listName5)) {
                     statement.executeUpdate("CREATE TABLE " + listName5 + " (staffId int not null, "
                     + "staffName varchar(20), staffpw varchar(20))");
@@ -91,17 +88,18 @@ public class Database {
                 statement.close();
             } catch (SQLException e) {
                 System.out.println("SQLException in establishConnection() in database.java: " + e.getMessage());
+                closeConnections();  
             }
         }
         
     }
     
+    //Checks a table doesn't exist already before creating it to avoid overwritting data
     private boolean checkTableExisting(String newTableName) {
         boolean flag = false;
         
         try {
             System.out.println("Checking for existing tables.... ");
-//            String[] types = {"TABLE"};
             DatabaseMetaData dbmd = conn.getMetaData();
             ResultSet rsDBMeta = dbmd.getTables(null, null, null, null);
             
@@ -112,9 +110,8 @@ public class Database {
                     flag = true;
                 }
             }
-//            if (rsDBMeta != null) {
-                rsDBMeta.close();
-//            }
+
+            rsDBMeta.close();
             
         } catch (SQLException ex) {
             System.out.println("Database: checkTableExisting() SQLException: " + ex.getMessage());
@@ -124,6 +121,8 @@ public class Database {
         return flag;
     } 
     
+    
+    //Close connection
     public void closeConnections() {
         if (conn != null) {
             try {
@@ -134,6 +133,7 @@ public class Database {
         }
     }
     
+    //Validate staff login with database records. Returns to model checkStaffLogin
     public Data checkStaffLogin(String username, String password, Data data){        
         try {
             Statement statement = conn.createStatement();
@@ -166,8 +166,7 @@ public class Database {
         return data;
     }
     
-    //test guest: qwe, 123
-    //Returns to model checkGuestLogin
+    //Validates guest login - This checks the user's inputted login details and checks if it's valid against database records. Returns to model checkGuestLogin.
     public Data checkGuestLogin(String username, String password, Data data) {
         try {
             Statement statement = conn.createStatement();
@@ -191,11 +190,12 @@ public class Database {
         return data;
     }
     
+    //This tells us how many records are in a table, for use with IDs
     private int getRecordCount(String tableName) {
         
         try {
             Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT COUNT(*) AS recordCount FROM " + tableName); //reference: https://stackoverflow.com/questions/7886462/how-to-get-row-count-using-resultset-in-java
+            ResultSet rs = statement.executeQuery("SELECT COUNT(*) AS recordCount FROM " + tableName); //Reference: https://stackoverflow.com/questions/7886462/how-to-get-row-count-using-resultset-in-java
             rs.next();
             int rowCount = rs.getInt("recordCount");
             
@@ -218,8 +218,7 @@ public class Database {
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery("SELECT roomNumber FROM rooms WHERE roomstatus = 0"
                     + " and roomtype = '" + roomType + "' ORDER BY RANDOM() fetch first 1 rows only");
-//            SELECT * FROM PDC.ROOMS where roomstatus = 0 and roomtype = 'SUITE' ORDER BY RANDOM() FETCH FIRST 1 ROWS ONLY;
-            if (!rs.next()) { //is this right??? if no results
+            if (!rs.next()) {
                 System.out.println("No rooms available for this Roomtype. Select another roomtype");
             } else {
                 roomNumber = rs.getInt("roomNumber");
@@ -234,37 +233,32 @@ public class Database {
         return roomNumber; 
     }
     
-    
+    //
     public Data createBooking(String guestName, String guestPhone, String roomType, int guestID, Data data) {
         Room newRoom;
         Booking newBooking;
-        Guest newGuest;
-          
+        Guest newGuest;         
         int assignedRoomNumber = fetchAvailableRoom(roomType);
         if (assignedRoomNumber == -1) { //no room available of this room type
             data.setBookingSuccess(false);
-            return data;
-//            return false;
-        }
-        
-        newRoom = new Room(assignedRoomNumber, roomType);
-       
+            return data; 
+        }       
+        newRoom = new Room(assignedRoomNumber, roomType);       
         try {
             PreparedStatement pstmt;
-            int bookingRowCount = getRecordCount("BOOKINGS");
+            int bookingRowCount = getRecordCount("BOOKINGS"); //this generates the new bookingID based on bookings record COUNT
             int guestRowCount;
-            if (guestID == -1) { //No Matching guest, so generate a new guestID and insert
-                guestRowCount = getRecordCount("GUESTS");
+            if (guestID == -1) { //No Existing Guest, so generate a new Guest and insert into database records
+                guestRowCount = getRecordCount("GUESTS"); //GuestID generated based on the guest record COUNT
                 pstmt = conn.prepareStatement("INSERT INTO GUESTS (GUESTID, GUESTNAME, GUESTPHONE, GUESTSTATUS)"
                     + "VALUES (?,?,?,?)");
-                pstmt.setInt(1, guestRowCount);
+                pstmt.setInt(1, guestRowCount); //Guest ID
                 pstmt.setString(2, guestName);
                 pstmt.setString(3, guestPhone);
                 pstmt.setInt(4, 20); //gueststatus for new guest w/ new booking is 20 = Active
                 pstmt.executeUpdate();
                 System.out.println("Added new Guest");
-            } else { //Guest exists already
-//                UPDATE guests SET gueststatus = 1 WHERE guestid = 3
+            } else { //Guest exists already - use this GuestID
                 Statement statement = conn.createStatement();
                 statement.executeUpdate("UPDATE guests SET gueststatus = 20 WHERE guestID = " + guestID + " AND gueststatus = 1");
                 guestRowCount = guestID;
@@ -274,7 +268,6 @@ public class Database {
             newGuest = new Guest(guestName, guestPhone);
             newGuest.setGuestID(guestRowCount);
             
-
             pstmt = conn.prepareStatement("INSERT INTO BOOKINGS (Bookingid, guestname, guestId, bookingstatus, roomnumber)"
                     + "VALUES (?,?,?,?,?)");
             pstmt.setInt (1, bookingRowCount); //bookingid
@@ -340,7 +333,87 @@ public class Database {
         return guest; //no matches will return a null
     }
     
+    public String[] fetchGuestsUserData (int guestID, String listMyBookingsFilter) {
+        String[] myBookingsList = null;
+        String myBookingsStr = "";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet rs = null;
+            switch(listMyBookingsFilter) {
+                case "Pending Requests":
+                    rs = statement.executeQuery("SELECT bookingid FROM guestrequest WHERE guestId = " + guestID);
+                    break;
+                case "Active Bookings":
+                    rs = statement.executeQuery("SELECT bookingid FROM bookings WHERE guestId = " + guestID + " AND bookingstatus != -1 AND bookingstatus != 3");
+                    break;
+                default: 
+                    rs = statement.executeQuery("SELECT bookingid FROM bookings WHERE guestId = " + guestID + " AND bookingstatus != -1");
+                    break;
+            }
+            
+            if ("Pending Requests".equals(listMyBookingsFilter)) {
+                while(rs.next()) {
+                    int bookingID = rs.getInt("BOOKINGID"); //position 1
+//                    int requestType = rs.getInt("REQUESTTYPE");//position 3
+//                    String description = rs.getString("DESCRIPTION"); //position 4       
+                    myBookingsStr += "Request for Booking ID " + bookingID + ";";
+                }
+            } else {
+                while(rs.next()) {
+                    myBookingsStr += "Booking " + rs.getInt("BOOKINGID") + ";";
+                }                
+            }
+
+            myBookingsList = myBookingsStr.split(";");
+            
+            if ("".equals(myBookingsList[0]))
+                myBookingsList = null;
+            
+            statement.close();
+            rs.close();
+        }catch (SQLException e) {
+            System.out.println("SQLException in fetchGuestsUserData in Database.java: " + e.getMessage());
+        }catch(NumberFormatException e) {
+            System.out.println("");
+        }
+        
+        return myBookingsList;
+    }
     
+    public String[] fetchMyBookingDetails(Integer bookingID) {
+        String[] bookingDetails = null;
+        String guestName = null;
+        String bookingStatus = null;
+        String roomNumber = null;
+        String requestType = null;
+        String description = null;
+        
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingid = " + bookingID);
+            if (rs.next()) {
+                guestName = rs.getString("GUESTNAME");
+                bookingStatus = Integer.toString(rs.getInt("BOOKINGSTATUS"));
+                roomNumber = Integer.toString(rs.getInt("ROOMNUMBER"));
+                
+            }
+            rs = statement.executeQuery("SELECT * FROM guestrequest WHERE bookingid = " + bookingID);
+            if (rs.next()) {              
+                requestType = Integer.toString(rs.getInt("REQUESTTYPE"));
+                description = rs.getString("DESCRIPTION");                   
+            }
+            bookingDetails = new String[]{guestName, bookingStatus, roomNumber, requestType, description};  
+            
+            rs.close();
+            statement.close();
+        } catch(SQLException e) {
+            System.out.println("SQLException in fetchMyBookingDetails in database.java: " + e.getMessage());
+        } catch(NumberFormatException e) {
+            System.out.println("NumberFormatException in fetchMyBookingDetails in database.java" + e.getMessage());
+        }
+        
+        return bookingDetails;
+    }
     
     public void  fetchRooms(MyTableModel tableModel, String filter) {
         Vector<String> columnNames = new Vector<>();
@@ -398,6 +471,9 @@ public class Database {
                             case 3:
                                 row.add("CHECKED OUT - Need cleaning"); 
                                 break;
+                            case 4: 
+                                row.add("OUT OF ORDER - Maintenance");
+                                break;
                             default:
                                 row.add("Error: INVALID CODE - fetchRooms() in Database.java");
                                 break;
@@ -454,7 +530,7 @@ public class Database {
                     rs = statement.executeQuery("SELECT * FROM guests WHERE gueststatus = 1");
                     break;
                 case "Guests with Request":
-                    rs = statement.executeQuery("SELECT * FROM guests WHERE gueststatus = 21");
+                    rs = statement.executeQuery("SELECT * FROM guestrequest");
                     break;
                 default:
                     rs = statement.executeQuery("SELECT * FROM guests"); //ALL GUESTS SHOWN
@@ -470,31 +546,42 @@ public class Database {
             }
             
             //Row Data
-            while(rs.next()){
-                Vector<Object> row = new Vector<Object>();
-                for (int i = 1; i <= numColumns; i++) {
-                    if (i == 4) {
-                        int status = rs.getInt("GUESTSTATUS");
-                        switch(status) {
-                            case 1:
-                                row.add("INACTIVE");
-                                break;
-                            case 20: 
-                                row.add("ACTIVE");
-                                break;
-                            case 21:
-                                row.add("ACTIVE - pending request");
-                                break;
-                            default:
-                                row.add("Status Error");
-                                break;
-                        }
-                    } else {
+            if ("Guests with Request".equals(filter)) {
+                while (rs.next()) {
+                   Vector<Object> row = new Vector<Object>();
+                    for (int i = 1; i <= numColumns; i++) {
                         row.add(rs.getObject(i));
-                    }                   
+                    } 
+                    rowData.add(row);
                 }
+            } else {
+                while(rs.next()){
+                    Vector<Object> row = new Vector<Object>();
+                    for (int i = 1; i <= numColumns; i++) {
+                        if (i == 4) {
+                            int status = rs.getInt("GUESTSTATUS");
+                            switch(status) {
+                                case 1:
+                                    row.add("INACTIVE");
+                                    break;
+                                case 20: 
+                                    row.add("ACTIVE");
+                                    break;
+                                case 21:
+                                    row.add("ACTIVE - pending request");
+                                    break;
+                                default:
+                                    row.add("Status Error");
+                                    break;
+                            }
+                        } else {
+                        row.add(rs.getObject(i));
+                        }                   
+                    }
                 rowData.add(row);
+                }
             }
+            
             rs.close();
             statement.close();
             
@@ -621,14 +708,14 @@ public class Database {
         try {
             Statement statement = conn.createStatement();
             
-            ResultSet rs = statement.executeQuery("SELECT guestid FROM bookings WHERE roomnumber = " + roomnumber);
+            ResultSet rs = statement.executeQuery("SELECT guestid FROM bookings WHERE roomnumber = " + roomnumber + " AND bookingstatus = 2");
             rs.next();
             guestID = rs.getInt("GUESTID");
             
             rs.close();
             statement.close();
         }catch (SQLException e) {
-            System.out.println("SQLException in findGuestIDwithRoomNo");
+            System.out.println("SQLException in findGuestIDwithRoomNo in database.java");
         } catch(NullPointerException e) {
             System.out.println("NullPointerExcecption in setGuestIDStatus after checkout - no match");
         }
@@ -725,10 +812,52 @@ public class Database {
 
         } catch (SQLException e) {
             System.out.println("SQLExceptin in cleanRoom database.java: " + e.getMessage());
+            return false;
         } catch (NullPointerException e) {
             System.out.println("NullPointerException in cleanRoom database.java: " + e.getMessage());
+            return false;
         }
         return true;
+    }
+    
+    public int findRoomStatus(int roomNumber) {
+        int roomstatus = -1;
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT roomstatus FROM rooms WHERE roomnumber = " + roomNumber);
+            rs.next();
+            roomstatus = rs.getInt("ROOMSTATUS");
+            rs.close();
+            statement.close();
+            
+            return roomstatus; 
+        } catch(SQLException e) {
+            System.out.println("SQLException in setRoomStatus in database.java: " + e.getMessage());            
+        }
+        return roomstatus;
+    }
+    
+    public int setRoomStatus(int roomNumber, int status) {
+//        int oldStatus;
+        try {
+            
+            Statement statement = conn.createStatement();
+            if (status == 4) //set to Out of Order
+                statement.executeUpdate("UPDATE rooms SET roomstatus = 4 WHERE roomstatus = 0 AND roomnumber = " + roomNumber);
+            else if (status ==0) //set to available
+                statement.executeUpdate("UPDATE rooms SET roomstatus = 0 WHERE roomstatus = 4 AND roomnumber = " + roomNumber);                                
+            else {
+                //not a correct status 
+                statement.close();
+                return -1;
+            }
+            statement.close();
+            
+        } catch(SQLException e) {
+            System.out.println("SQLException in setRoomStatus in database.java: " + e.getMessage());
+            return -1;
+        }
+        return 1;
     }
     
 }

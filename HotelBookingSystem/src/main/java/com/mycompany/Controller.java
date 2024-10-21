@@ -20,16 +20,18 @@ public class Controller implements ActionListener {
         this.view = view;
         this.model = model;
         this.view.addActionListener(this);
+        
         //make sure the view table model is assigned TO THE model table model
         model.data = view.data;
         model.data.tableModelBookings = view.tableModelBookings;
         model.data.tableModelGuests = view.tableModelGuests;
         model.data.tableModelRooms = view.tableModelRooms;
+        model.data.myBookingsListstr = view.myBookingsListstr;
         
         view.loadBookingMSGCards();
     }
     
-    //TODO
+    //Listens to user input from GUI and performs an action
     @Override
     public void actionPerformed(ActionEvent e) {
         String action = e.getActionCommand();
@@ -45,6 +47,7 @@ public class Controller implements ActionListener {
                 }
                 else if (this.model.data.userMode == 0) {
                     this.model.checkGuestLogin(username, password);
+                    model.fetchGuestUserData();
                 }
                 break;
             case "Continue":
@@ -119,6 +122,34 @@ public class Controller implements ActionListener {
                 System.out.println("Setting room as cleaned...");
                 String roomNumber = view.roomNumbertxfRF.getText();
                 model.cleanRoom(roomNumber);
+                break;
+            case "Find Room":
+                roomNumber = view.roomNumbertxfRF2.getText();
+                model.fetchRoomStatus(roomNumber);
+                break;
+            case "Set Room Status":
+                if (view.availableRB.isSelected())
+                   model.setRoomStatus(view.roomNumbertxfRF2.getText(), 0);                    
+                else if (view.OOORBtn.isSelected())
+                   model.setRoomStatus(view.roomNumbertxfRF2.getText(), 4);
+                break;
+            case "Update Phone Number":
+                view.ManageGuestMSG.setText("Feature not yet available");
+                break;
+            case "myBookingsFilterOptions":
+                String myBookingsFilter = (String) view.myBookingsFilter.getSelectedItem();
+                model.data.listMyBookingsFilter = myBookingsFilter;
+                model.fetchGuestUserData();
+                if ("Pending Requests".equals(myBookingsFilter)) 
+                    view.leftPanelBOTTOMbtn.setText("View Request");
+                else 
+                    view.leftPanelBOTTOMbtn.setText("View Booking");
+                break;
+            case "View Booking":                
+                model.fetchMyBookingDetails(view.myBookingsList.getSelectedValue());
+                break;
+            case "View Request":
+                model.fetchMyRequestDetails(view.myBookingsList.getSelectedValue());
                 break;
             default:
                 break;

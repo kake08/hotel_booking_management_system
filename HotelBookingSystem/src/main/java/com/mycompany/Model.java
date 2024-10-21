@@ -12,9 +12,6 @@ package com.mycompany;
 public class Model {
     public Database db;
     public Data data;
-//    public String currentUser; //should this be User class?
-    //public Data array list of data?
-    //public String username //current username
     
     private ModelListener listener; //listener to notify when model's data is updated (to update view)
     
@@ -30,7 +27,6 @@ public class Model {
     
     public void checkStaffLogin(String username, String password) {
         this.data = this.db.checkStaffLogin(username, password, this.data); 
-//        refreshLists();
         notifyListener(); //listener is view - update view
     }
     
@@ -62,6 +58,27 @@ public class Model {
         
         notifyListener();           
     }
+    
+    public void fetchGuestUserData(){
+        String[] myBookingsList = db.fetchGuestsUserData(data.currentloggedGuestID, data.listMyBookingsFilter);
+//        if (myBookingsList == null && "Pending Requests".equals(data.listMyBookingsFilter)) 
+//            data.myBookingsListstr = new String[] {"No Pending Request"};
+//        else if (myBookingsList == null && !"Pending Request".equals(data.listMyBookingsFilter))
+//            data.myBookingsListstr = new String[] {"No Bookings"};
+        if (myBookingsList == null) {
+            data.myBookingsListstr = new String[] {"No Bookings"};
+        }
+        else {    
+            data.myBookingsListstr = myBookingsList;     
+        }
+        
+       
+        
+        
+        listener.updateLoggedGuestBookingsList(data.myBookingsListstr);       
+    }
+    
+
    
        
     public void createBooking(String bookingDetails[]){
@@ -73,9 +90,7 @@ public class Model {
             listener.createBookingFeedbackMSG(-1);
             return;
         }
-        data.setBookingFlag(true); //true means it will go through booking process
-        
-        
+        data.setBookingFlag(true); //true means it will go through booking process      
         
         //if (no matches) else(matches -> feed the guestID to method)
         Guest guest = db.matchingGuestExist(guestName, guestPhone); //-1 is null, other number is the matching guest ID
@@ -153,13 +168,14 @@ public class Model {
         }
         
         if (data.isCheckOutFlag()) {
-            System.out.println("Confirming check in....");
+            System.out.println("Confirming check out....");
             boolean output = db.checkOUTGuest(data.getRecentRoom().roomNumber);
             if (output) {
                 data.setCheckOutFlag(false);
                 fetchData();
                 listener.checkOutFeedbackMSG(0);
             } else {
+                fetchData();
                 listener.checkOutFeedbackMSG(-1);
             }
             
@@ -268,6 +284,85 @@ public class Model {
         }
         fetchData();
     }
+    
+    public void fetchRoomStatus(String roomNumber) {
+        int roomNumberInt; 
+        try {
+            roomNumberInt = Integer.parseInt(roomNumber);
+            
+        }catch(NumberFormatException e) {
+            System.out.println("Error converting String to integer in cleanRoom in Model.java" + e.getMessage());
+            listener.OOORoomFeedbackMSG(-1);
+            return;
+        }
+        
+        int roomstatus = db.findRoomStatus(roomNumberInt);
+        if (roomstatus != 0 && roomstatus != 4)     
+            listener.OOORoomFeedbackMSG(-1); //0 or 4
+        else
+            listener.OOORoomFeedbackMSG(roomstatus);
+    }
+    
+    public void setRoomStatus(String roomNumber, int status){
+        int roomNumberInt; 
+        try {
+            roomNumberInt = Integer.parseInt(roomNumber);
+            
+        }catch(NumberFormatException e) {
+            System.out.println("Error converting String to integer in cleanRoom in Model.java" + e.getMessage());
+            listener.OOORoomFeedbackMSG(-1);
+            return;
+        }
+        
+        int output = db.setRoomStatus(roomNumberInt, status);
+        listener.OOORoomFeedbackMSG(output);
+        
+        fetchData();
+    }
+    
+    private String translateBookingStatus(String status) {
+        switch(status) {
+            case "1":
+                return "Pending Booking - Ready for Check In";
+            case "2":
+                return "Active - Currently Occupied";
+            case "3":
+                return "Historical - Checked Out";
+                
+            }
+        return null;
+    }
+    
+    public void fetchMyBookingDetails(String selectedBooking) {
+        if (selectedBooking == null || "No Bookings".equals(selectedBooking)) {
+            System.out.println("No Booking Selected");
+            return;
+        }
+        String[] bookingId = selectedBooking.split(" ");
+        int bookingIdInt = -1;
+//        System.out.println(bookingId[1]);
+        try {
+            bookingIdInt = Integer.parseInt(bookingId[1]);
+        } catch(NumberFormatException e) {
+            System.out.println("NumbferFormatException in fetchMyBookingDetails; " + e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println("No booking selected: " + e.getMessage());
+        }
+        String[] bookingDetails = db.fetchMyBookingDetails(bookingIdInt);
+        bookingDetails[1] = translateBookingStatus(bookingDetails[1]);
+        listener.viewMyBookingDetails(bookingDetails, bookingIdInt);             
+    }
+    
+    public void fetchMyRequestDetails(String selectedRequest) {
+        if (selectedRequest == null) {
+            System.out.println("No Request Selected");
+            return;
+        }
+        
+        String[] requestID = selectedRequest.split(" ");
+        
+    }
+    
    
     //Refresh all lists including: Bookings, Guests and Rooms table -> Only updates database -> Data.
     //Data is always an updated reflection of what's on the database

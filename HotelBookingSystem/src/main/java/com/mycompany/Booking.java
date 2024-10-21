@@ -9,7 +9,6 @@ package com.mycompany;
  * @author DeanK
  */
 public class Booking {
-    //"Booking ID", "Guest Name", "GuestID", "CURRENT", "RoomNumber"
     private Integer bookingID; // unique booking id
     private Guest guest;
     private boolean isCurrent;

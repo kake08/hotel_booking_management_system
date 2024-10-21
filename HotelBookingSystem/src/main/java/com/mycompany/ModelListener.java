@@ -24,4 +24,10 @@ public interface ModelListener {
     
     //Manage Rooms
     void cleanRoomFeedbackMSG(int output);
+    
+    void OOORoomFeedbackMSG(int output);
+    
+    void updateLoggedGuestBookingsList(String[] updatedBookingsList);
+    
+    void viewMyBookingDetails(String[] bookingDetails, int bookingID);
 }
