@@ -16,41 +16,45 @@ public class Model {
     private ModelListener listener; //listener to notify when model's data is updated (to update view)
     
     public Model() {
-        this.db = new Database();
-        this.db.establishConnection(); //why not just call setup when instantiating Database
-        data = new Data();
+        this.db = new Database(); //instantiate and initialize Database
+        this.db.establishConnection(); //make connection to database 
+        data = new Data(); //for storing data utilised during runtime
     }
     
+    //Sets the listener (in this case as the view) - listens to changes in database and updates display accordingly
     public void setListener(ModelListener listener) {
         this.listener = listener;
     }
     
+    //This method takes input from user as parameters and prompts staff database to validate it for staff login
     public void checkStaffLogin(String username, String password) {
         this.data = this.db.checkStaffLogin(username, password, this.data); 
         notifyListener(); //listener is view - update view
     }
     
+    //This method takes input from user as parameters and prompts guest database to validate it for guest login
     public void checkGuestLogin(String username, String password) {
         this.data = this.db.checkGuestLogin(username, password, this.data);
         notifyListener();
     }
     
+    //This method sets the user mode as either staff or guest mode, to support user login and validate data from the correct user database
     public void setUserMode(int usermode) {
         this.data.userMode = usermode;
     }
     
-    //Removes user and sets loginFlag to flase
+    //This method on log out removes currentloggeduser and sets loginFlag to false
     public void setLoggedOut() { 
         data.loginFlag = false;
         data.currentloggeduser = "";        
     }
     
+    //This method returns the currentlogged user
     public int getUserMode() {
         return this.data.userMode;
     }
-    
-    
-    //Notifying the listener(view) when data is updated    
+      
+    //Notifying the listener(view, particularly the table) when data is updated    
     public void fetchData() { 
         db.fetchBookings(data.tableModelBookings, data.tableBookingsFilter);
         db.fetchGuests(data.tableModelGuests, data.tableGuestsFilter);
@@ -59,28 +63,23 @@ public class Model {
         notifyListener();           
     }
     
+    //This method fetches logged Guest user's booking data for display in the Guest's menu's my Bookings List.
+    //Omitted code below is due to omitted feature of guest request in this project
     public void fetchGuestUserData(){
         String[] myBookingsList = db.fetchGuestsUserData(data.currentloggedGuestID, data.listMyBookingsFilter);
 //        if (myBookingsList == null && "Pending Requests".equals(data.listMyBookingsFilter)) 
 //            data.myBookingsListstr = new String[] {"No Pending Request"};
 //        else if (myBookingsList == null && !"Pending Request".equals(data.listMyBookingsFilter))
 //            data.myBookingsListstr = new String[] {"No Bookings"};
-        if (myBookingsList == null) {
+        if (myBookingsList == null)
             data.myBookingsListstr = new String[] {"No Bookings"};
-        }
-        else {    
+        else
             data.myBookingsListstr = myBookingsList;     
-        }
-        
-       
-        
-        
         listener.updateLoggedGuestBookingsList(data.myBookingsListstr);       
     }
     
-
-   
-       
+    //This method creates a new bookings by taking the user's input as a string list parameter and 
+    //passing it to database method for insertion of new booking to database
     public void createBooking(String bookingDetails[]){
         String guestName = bookingDetails[0];
         String guestPhone = bookingDetails[1];
@@ -111,6 +110,7 @@ public class Model {
         notifyListener();
     }
    
+    //This method cancels booking by taking a valid bookingID as its parameter and passing it to database for update
     public void cancelBooking(String bookingID) {
         int bookingIDint;
         try {
@@ -152,11 +152,10 @@ public class Model {
             notifyListener();
             listener.cancelBookingFeedbackMSG(1);             
             
-        }
-        
-        
+        }               
     }
      
+    //This method Checks out a valid Occupied booking by taking its bookingID as parameter and passing it to database for update
     public void checkOUTGuest (String bookingID) {
         int bookingIDint;
         try {
@@ -201,9 +200,9 @@ public class Model {
             notifyListener();
             listener.checkOutFeedbackMSG(1);            
         }
-
     }
-      
+     
+    //This method checks in a Guest's booking by taking a valid bookingId in pending status and passing it to database for update
     public void checkINGuest (String bookingID) {
         int bookingIDint;
         try {
@@ -245,6 +244,7 @@ public class Model {
         notifyListener();
     }
  
+    //This method has been omitted as the guest request feature has been omitted for now
     public void houseKeepRoom(String roomNumber) {
 //        int roomNumberInt; 
 //        try {
@@ -265,6 +265,8 @@ public class Model {
 //        fetchData();
     }
     
+    //This method cleans a room that's been Checked out by taking a user's inputted valid room number, passing it to database for update
+    //Room will be set as available, and display for user will be updated
     public void cleanRoom (String roomNumber) {
         int roomNumberInt; 
         try {
@@ -285,6 +287,8 @@ public class Model {
         fetchData();
     }
     
+    //This method fetches an available/out of order room's current status by taking roomnumber as parameter, 
+    //and displaying room's current status with radio button in view.
     public void fetchRoomStatus(String roomNumber) {
         int roomNumberInt; 
         try {
@@ -303,6 +307,8 @@ public class Model {
             listener.OOORoomFeedbackMSG(roomstatus);
     }
     
+    //This method updates a room's status by taking the roomnumber to identify which room to update
+    //and status to update to status we want on the database, and then display changes on view.
     public void setRoomStatus(String roomNumber, int status){
         int roomNumberInt; 
         try {
@@ -320,6 +326,8 @@ public class Model {
         fetchData();
     }
     
+    //This method translates a booking's status which is represented by numbers in database
+    //to booking status understood by user.
     private String translateBookingStatus(String status) {
         switch(status) {
             case "1":
@@ -333,6 +341,8 @@ public class Model {
         return null;
     }
     
+    //This method fetches booking details for a selected booking in the guest user menu's booking list
+    //and updates the display by showing the booking details in guest user's main panel
     public void fetchMyBookingDetails(String selectedBooking) {
         if (selectedBooking == null || "No Bookings".equals(selectedBooking)) {
             System.out.println("No Booking Selected");
@@ -340,7 +350,6 @@ public class Model {
         }
         String[] bookingId = selectedBooking.split(" ");
         int bookingIdInt = -1;
-//        System.out.println(bookingId[1]);
         try {
             bookingIdInt = Integer.parseInt(bookingId[1]);
         } catch(NumberFormatException e) {
@@ -353,17 +362,17 @@ public class Model {
         listener.viewMyBookingDetails(bookingDetails, bookingIdInt);             
     }
     
+    //Omitted as guest request feature has been omitted
+    //This method fetches guest user's selected request in the guest user menu's booking list for 
+    //display in guest user's main panel
     public void fetchMyRequestDetails(String selectedRequest) {
         if (selectedRequest == null) {
             System.out.println("No Request Selected");
             return;
-        }
-        
-        String[] requestID = selectedRequest.split(" ");
-        
+        }       
+        String[] requestID = selectedRequest.split(" ");      
     }
     
-   
     //Refresh all lists including: Bookings, Guests and Rooms table -> Only updates database -> Data.
     //Data is always an updated reflection of what's on the database
     private void notifyListener() {

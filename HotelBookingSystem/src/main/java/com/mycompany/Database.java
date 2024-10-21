@@ -233,7 +233,7 @@ public class Database {
         return roomNumber; 
     }
     
-    //
+    //Create a booking with user's input and adds booking to database, then updates table
     public Data createBooking(String guestName, String guestPhone, String roomType, int guestID, Data data) {
         Room newRoom;
         Booking newBooking;
@@ -289,15 +289,14 @@ public class Database {
             
             data = setRecentBookingRoomGuest(data, newBooking, newGuest, newRoom);
             return data;
-//            return true;
         } catch(SQLException e) {
             System.out.println("SQLException in Database(createbooking): " +e.getMessage());
         }
         data.setBookingSuccess(false);
         return data;
-//        return false;
     }
     
+    //This adds newly added booking to data for quick access in GUI when showing confirmation 
     private Data setRecentBookingRoomGuest(Data data, Booking Booking, Guest guest, Room room) {
         data.setRecentBooking(Booking);
         data.setRecentGuest(guest);
@@ -307,6 +306,7 @@ public class Database {
     }
 
     
+    //Finds a matching Guest ID and guestPhone in the database for Guests
     //Called in model before making booking for finding an identical guest (same matching details)
     public Guest matchingGuestExist(String guestName, String guestPhone){
         Guest guest = null;
@@ -333,6 +333,7 @@ public class Database {
         return guest; //no matches will return a null
     }
     
+    //According to guestID and JComboBox filter in View, we find the bookings for this guest and filter according to selected filter which to view
     public String[] fetchGuestsUserData (int guestID, String listMyBookingsFilter) {
         String[] myBookingsList = null;
         String myBookingsStr = "";
@@ -380,6 +381,7 @@ public class Database {
         return myBookingsList;
     }
     
+    //This fetches the Booking details selected by the guest in guest menu according to booking ID for display to guest user
     public String[] fetchMyBookingDetails(Integer bookingID) {
         String[] bookingDetails = null;
         String guestName = null;
@@ -415,6 +417,7 @@ public class Database {
         return bookingDetails;
     }
     
+    //This fetches the rooms list according to filter, for display of room table to staff user
     public void  fetchRooms(MyTableModel tableModel, String filter) {
         Vector<String> columnNames = new Vector<>();
         Vector<Vector<Object>> rowData = new Vector<>();
@@ -514,6 +517,7 @@ public class Database {
         return guestDetails;
     }
     
+    //This fetches the guest's list according to the filter for display on guest table in staff user's menu
     public void fetchGuests(MyTableModel tableModel, String filter) {
         Vector<String> columnNames = new Vector<>();        
         Vector<Vector<Object>> rowData = new Vector<>();  
@@ -592,11 +596,9 @@ public class Database {
         tableModel.updateTableModelData(rowData, columnNames);   
     }
     
-    
+    //This fetches bookings from database according to filter for display on bookings table in staff user's menu
     public void fetchBookings(MyTableModel tableModel, String filter) {
-//        "All Bookings", "2=Active Bookings", "1=Pending Bookings", "3=Historical Bookings"
-        
-        
+//        "All Bookings", "2=Active Bookings", "1=Pending Bookings", "3=Historical Bookings"        
         Vector<String> columnNames = new Vector<>();        
         Vector<Vector<Object>> rowData = new Vector<>();  
         
@@ -605,19 +607,19 @@ public class Database {
             ResultSet rs;
             switch (filter) {
                 case "Active Bookings":
-                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus = 2");
+                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus = 2 ORDER BY bookingid DESC");
                     System.out.println("Filter Active Bookings");
                     break;
                 case "Pending Bookings":
-                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus = 1");
+                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus = 1 ORDER BY bookingid DESC");
                     System.out.println("Filter Pending Bookings");
                     break;
                 case "Historical Bookings":
-                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus = 3");
+                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus = 3 ORDER BY bookingid DESC");
                     System.out.println("Filter Historical Bookings");
                     break;
                 default:
-                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus != -1"); //ALL BOOKINGS PRINTED except deleted/cancelled bookings
+                    rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingstatus != -1 ORDER BY bookingid DESC"); //ALL BOOKINGS PRINTED except deleted/cancelled bookings
                     System.out.println("Filter All Bookings");
                     break;
             }
@@ -667,6 +669,7 @@ public class Database {
         tableModel.updateTableModelData(rowData, columnNames);
     }
     
+    //This cancels a boooking created (only a pending booking only) and marks it as being deleted/cancelled - not visible to user but still in database.
     public boolean cancelBooking(int roomnumber) {
         System.out.println("Cancelling booking in database...");
         try {
@@ -685,6 +688,7 @@ public class Database {
         return false;
     }
     
+    //This checksOut guest by setting booking to checked out and setting room status as checked out
     public boolean checkOUTGuest(int roomnumber) {
         System.out.println("Checking Out Guest in database.....");
         try {
@@ -703,6 +707,7 @@ public class Database {
         return false;
     }
     
+    //This finds guest ID that's currently occupying the roomnumber specified
     private int findGuestIDwithRoomNo(int roomnumber) {
         int guestID = -1;
         try {
@@ -742,6 +747,7 @@ public class Database {
         return true;
     }
     
+    //This checks in guest according to roomnumber, updating room status and booking status
     public boolean checkINGuest(int roomnumber) {
         System.out.println("Checking In Guest....");
         try {
@@ -759,11 +765,10 @@ public class Database {
         return false;
     }
 
-    
+    //Finds booking of appropriate room status from database with a bookingID and returns a String list of booking infomation
     public String[] findBookingIDMatch(int bookingID, int[] targetRoomStatus) {
         System.out.println("Checking for matching bookingID on the system");
         String[] bookingDetails = null;
-        
         try {
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery("SELECT * FROM bookings WHERE bookingid = " + bookingID);
@@ -791,6 +796,7 @@ public class Database {
         return bookingDetails;
     }
     
+    //This sets a checked-out room as cleaned and set as available for booking again.
     public boolean cleanRoom(int roomnumber) {
         
         try {
@@ -820,6 +826,7 @@ public class Database {
         return true;
     }
     
+    //This method retrieves the Room status of a particular Room by its room number
     public int findRoomStatus(int roomNumber) {
         int roomstatus = -1;
         try {
@@ -837,8 +844,8 @@ public class Database {
         return roomstatus;
     }
     
+    //This method sets the room status to a specified status of a particular room by its room number 
     public int setRoomStatus(int roomNumber, int status) {
-//        int oldStatus;
         try {
             
             Statement statement = conn.createStatement();

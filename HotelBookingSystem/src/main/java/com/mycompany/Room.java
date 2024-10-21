@@ -12,6 +12,7 @@ public class Room {
     int roomNumber;
     String roomType;
     
+    //Constructor
     public Room(int roomNumber, String roomType) {
         this.roomNumber = roomNumber;
         this.roomType = roomType;

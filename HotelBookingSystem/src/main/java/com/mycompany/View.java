@@ -6,7 +6,6 @@ package com.mycompany;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -31,7 +30,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -162,10 +160,7 @@ public class View extends JFrame implements ModelListener{
         init();
         loadLogin();
         loadStaffMenuPanel();        
-        loadGuestMenuPanel();
-//        loadBookingForms();
-//        loadGuestForms();
-        
+        loadGuestMenuPanel();        
         cards.show(mainPanel, "STARTPANEL");
         this.add(mainPanel);
         setVisible(true);
@@ -198,7 +193,7 @@ public class View extends JFrame implements ModelListener{
      
     //initializes frame 
     private void init() {
-        setSize(900,500);
+        setSize(1120,500);
         setLocationRelativeTo(null);
         setTitle("Hotel Booking System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -1444,7 +1439,7 @@ public class View extends JFrame implements ModelListener{
 //          0 is available, 4 is out of order
 //          other outputs --> -1
         if (output == -1){
-            manageRoomMSG.setText("Invalid Room Number");
+            manageRoomMSG.setText("Invalid Room Number - Must be an Available Room");
             roomFormCards.show(leftPanel3btnCENTER, "OOOFORM");
             roomNumbertxfRF2.setText("");
             //invalid roomnumber;

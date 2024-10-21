@@ -10,6 +10,7 @@ package com.mycompany;
  */
 public interface ModelListener {
     
+    //Model listener for updates in model/database, for user visual feedback
     //Manage Bookings
     void onModelUpdate(Data data);
     

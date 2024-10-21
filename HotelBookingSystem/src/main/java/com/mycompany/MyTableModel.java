@@ -11,6 +11,8 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author DeanK
  */
+
+//Reference: Assistance from ChatGPT
 public class MyTableModel extends DefaultTableModel{
     
     public void updateTableModelData(Vector<Vector<Object>> rowData, Vector<String> columnNames){
@@ -19,8 +21,7 @@ public class MyTableModel extends DefaultTableModel{
         
         for(Vector<Object> row: rowData) {
             addRow(row);
-        }
-        
+        }      
         fireTableDataChanged();
     }
 }
