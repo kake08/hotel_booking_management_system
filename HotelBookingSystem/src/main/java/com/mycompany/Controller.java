@@ -6,6 +6,8 @@ package com.mycompany;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -15,6 +17,7 @@ public class Controller implements ActionListener {
 
     public View view;
     public Model model;
+    Map<String, Command> commands = new HashMap<>();
     
     public Controller(View view, Model model) {
         this.view = view;
@@ -29,130 +32,42 @@ public class Controller implements ActionListener {
         model.data.myBookingsListstr = view.myBookingsListstr;
         
         view.loadBookingMSGCards();
+        
+        
+        putCommands();
     }
     
-    //Listens to user input from GUI and performs an action
+    private void putCommands() {
+        commands.put("Log In", new LogInCommand(model, view));
+        commands.put("Continue", new ContinueCommand(model, view));
+        commands.put("Logout", new LogOutCommand(model, view));
+        commands.put("Create Booking", new CreateBookingCommand(model,view));
+        commands.put("Check In Guest", new CheckInGuestCommand(model, view));
+        commands.put("Confirm Check In", new ConfirmCheckInCommand(model, view));
+        commands.put("Check Out Guest", new CheckOutGuestCommand(model, view));
+        commands.put("Confirm Check Out", new ConfirmCheckOutCommand(model, view));
+        commands.put("comboBoxChanged", new ComboBoxChangedCommand(model, view));
+        commands.put("Cancel Booking", new CancelBookingCommand(model, view));
+        commands.put("Confirm Cancellation", new ConfirmCancellationCommand(model, view));
+        commands.put("Clean Room", new CleanRoomCommand(model,view));
+        commands.put("Find Room", new FindRoomCommand(model, view));
+        commands.put("Set Room Status", new SetRoomStatusCommand(model, view));
+        commands.put("myBookingsFilterOptions", new MyBookingsFilterOptionsCommand(model, view));
+        commands.put("View Booking", new ViewBookingCommand(model, view));
+        commands.put("View Request", new ViewRequestCommand(model,view));
+ 
+        //omitted as not implemented yet
+//        commands.put("Update Phone Number", new UpdatePhoneNumberCommand(model,view));
+    }
+    
+    //Listens to user input from GUI and performs an action depending on action event
     @Override
     public void actionPerformed(ActionEvent e) {
         String action = e.getActionCommand();
         System.out.println(action);
-        switch(action) {
-            case "Log In":
-                String username = this.view.username.getText();
-                String password = this.view.password.getText();
-                System.out.println(action + " clicked!");
-                if(this.model.data.userMode == 1) {
-                    this.model.checkStaffLogin(username, password);
-                    model.fetchData();
-                }
-                else if (this.model.data.userMode == 0) {
-                    this.model.checkGuestLogin(username, password);
-                    model.fetchGuestUserData();
-                }
-                break;
-            case "Continue":
-                //set the usermode as either staff or guest model.data.usermode
-                String userMode = (String) this.view.userComboBox.getSelectedItem();
-                if ("Login as Guest".equals(userMode)) {
-                    this.model.setUserMode(0);
-                    view.labelPW.setText("Phone Number: ");
-                    System.out.println("Set Usermode as Guest = 0");
-                } else if ("Login as Staff".equals(userMode)) {
-                    this.model.setUserMode(1);
-                    view.labelPW.setText("Password: ");
-                    System.out.println("Set User mode as Staff = 1");
-                }
-                view.setUserMode(this.model.getUserMode());
-                break;
-            case "Logout":     
-                System.out.println("Logged Out...Still userMode" + this.model.getUserMode());
-                model.setLoggedOut();
-                view.setUserMode(this.model.getUserMode());
-                break;
-            case "Create Booking":
-                System.out.println("Creating new Booking....");
-                String[] newBookingStr = new String[] {view.guestNametxf.getText(), view.numTxf.getText(), (String)view.roomOptions.getSelectedItem()};
-                model.createBooking(newBookingStr);
-                break;
-            case "Check In Guest":
-                System.out.println("Checking in Guest....");
-                String bookingID = view.bookingIDtxf1.getText();
-                //Find the booking details for that Booking ID
-                model.checkINGuest(bookingID);               
-                break;
-            case "Confirm Check In":
-                System.out.println("Confirming check in...");
-                //flag for checkinconfirmed
-                model.data.setCheckInConfirmed(true);
-                bookingID = view.bookingIDtxf1.getText();
-                model.checkINGuest(bookingID);  
-                break;
-            case "Check Out Guest":
-                System.out.println("Checking Out Guest....");
-                String bookingID2 = view.bookingIDtxf2.getText();
-                model.checkOUTGuest(bookingID2);
-                break;
-            case "Confirm Check Out":
-                System.out.println("Confirming check out...");
-                model.data.setCheckOutFlag(true);
-                bookingID = view.bookingIDtxf2.getText();
-                model.checkOUTGuest(bookingID);
-                break;
-            case "comboBoxChanged":
-                String filter = (String) view.bookingsFilterOptions.getSelectedItem();
-                model.data.tableBookingsFilter = filter;
-                filter = (String) view.guestsFilterOptions.getSelectedItem();
-                model.data.tableGuestsFilter = filter;
-                filter = (String) view.roomsFilterOptions.getSelectedItem();
-                model.data.tableRoomsFilter = filter;
-                model.fetchData();
-                break;
-            case "Cancel Booking":
-                System.out.println("Cancelling booking...");
-                bookingID = view.bookingIDtxf3.getText();
-                model.cancelBooking(bookingID);
-                break;
-            case "Confirm Cancellation":
-                System.out.println("Confirming cancellation...");
-                model.data.setCancelBookingFlag(true);
-                bookingID = view.bookingIDtxf3.getText();
-                model.cancelBooking(bookingID);
-                break;
-            case "Clean Room":
-                System.out.println("Setting room as cleaned...");
-                String roomNumber = view.roomNumbertxfRF.getText();
-                model.cleanRoom(roomNumber);
-                break;
-            case "Find Room":
-                roomNumber = view.roomNumbertxfRF2.getText();
-                model.fetchRoomStatus(roomNumber);
-                break;
-            case "Set Room Status":
-                if (view.availableRB.isSelected())
-                   model.setRoomStatus(view.roomNumbertxfRF2.getText(), 0);                    
-                else if (view.OOORBtn.isSelected())
-                   model.setRoomStatus(view.roomNumbertxfRF2.getText(), 4);
-                break;
-            case "Update Phone Number":
-                view.ManageGuestMSG.setText("Feature not yet available");
-                break;
-            case "myBookingsFilterOptions":
-                String myBookingsFilter = (String) view.myBookingsFilter.getSelectedItem();
-                model.data.listMyBookingsFilter = myBookingsFilter;
-                model.fetchGuestUserData();
-                if ("Pending Requests".equals(myBookingsFilter)) 
-                    view.leftPanelBOTTOMbtn.setText("View Request");
-                else 
-                    view.leftPanelBOTTOMbtn.setText("View Booking");
-                break;
-            case "View Booking":                
-                model.fetchMyBookingDetails(view.myBookingsList.getSelectedValue());
-                break;
-            case "View Request":
-                model.fetchMyRequestDetails(view.myBookingsList.getSelectedValue());
-                break;
-            default:
-                break;
+        Command command = commands.get(action);
+        if (command != null) {
+            command.execute();
         }
     }
     
