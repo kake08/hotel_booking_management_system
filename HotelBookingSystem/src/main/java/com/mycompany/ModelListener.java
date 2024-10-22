@@ -31,4 +31,6 @@ public interface ModelListener {
     void updateLoggedGuestBookingsList(String[] updatedBookingsList);
     
     void viewMyBookingDetails(String[] bookingDetails, int bookingID);
+    
+    void clearGuestBookingContents();
 }

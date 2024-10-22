@@ -76,6 +76,7 @@ public class Model {
         else
             data.myBookingsListstr = myBookingsList;     
         listener.updateLoggedGuestBookingsList(data.myBookingsListstr);       
+        listener.clearGuestBookingContents(); 
     }
     
     //This method creates a new bookings by taking the user's input as a string list parameter and 

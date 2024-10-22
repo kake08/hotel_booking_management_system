@@ -27,7 +27,7 @@ public class MyBookingPanelManager {
     public JButton leftPanelBOTTOMbtn;
     public JComboBox<String> myBookingsFilter;
     public JList<String> myBookingsList;
-    private JLabel bookingTitle, bookingContents;
+    public JLabel bookingTitle, bookingContents;
     private JButton seeMenubtn, seeRoomDetailsbtn;
     String[] myBookingsListstr = new String[]{"No Bookings"};
     

@@ -26,12 +26,12 @@ public class Controller implements ActionListener {
         
         //make sure the view table model is assigned TO THE model table model
         model.data = view.data;
-        model.data.tableModelBookings = view.tableModelBookings;
+        model.data.tableModelBookings = view.manageBookingsPanelMgr.tableModelBookings;
         model.data.tableModelGuests = view.manageGuestsPanelMgr.tableModelGuests;
         model.data.tableModelRooms = view.manageRoomsPanelMgr.tableModelRooms;
         model.data.myBookingsListstr = view.myBookingPanelMgr.myBookingsListstr;
         
-        view.loadBookingMSGCards();
+        view.manageBookingsPanelMgr.loadBookingMSGCards();
         
         
         putCommands();

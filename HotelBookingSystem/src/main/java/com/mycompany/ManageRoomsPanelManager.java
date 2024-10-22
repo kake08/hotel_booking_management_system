@@ -260,13 +260,13 @@ public class ManageRoomsPanelManager {
         }
     }
     
-        public void OOORoomFeedbackMSG(int output) {
-//         System.out.println("OUTPUT: " +  output);
-//         -1 is invalid; 1 is updated!! message
-//          0 is available, 4 is out of order
-//          other outputs --> -1
+    public void OOORoomFeedbackMSG(int output) {
+    //         System.out.println("OUTPUT: " +  output);
+    //         -1 is invalid; 1 is updated!! message
+    //          0 is available, 4 is out of order
+    //          other outputs --> -1
         if (output == -1){
-            manageRoomMSG.setText("Invalid Room Number - Must be an Available Room");
+            manageRoomMSG.setText("Invalid Room Number - Must be an Available/Our of Order Room");
             roomFormCards.show(leftPanel3btnCENTER, "OOOFORM");
             roomNumbertxfRF2.setText("");
             //invalid roomnumber;

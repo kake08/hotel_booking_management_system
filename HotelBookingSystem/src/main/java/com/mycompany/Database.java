@@ -502,7 +502,7 @@ public class Database {
         
         try {
             Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT guestname, guestid FROM bookings WHERE roomnumber = " + roomNumber);
+            ResultSet rs = statement.executeQuery("SELECT guestname, guestid FROM bookings WHERE roomnumber = " + roomNumber + " AND bookingstatus != 3 AND bookingstatus != -1");
             rs.next();
             guestDetails = rs.getInt("GUESTID") + " " + rs.getString("GUESTNAME");
             

@@ -91,7 +91,7 @@ class CreateBookingCommand implements Command {
     @Override
     public void execute() {
         System.out.println("Creating new Booking....");
-        String[] newBookingStr = new String[] {view.guestNametxf.getText(), view.numTxf.getText(), (String)view.roomOptions.getSelectedItem()};
+        String[] newBookingStr = new String[] {view.manageBookingsPanelMgr.guestNametxf.getText(), view.manageBookingsPanelMgr.numTxf.getText(), (String)view.manageBookingsPanelMgr.roomOptions.getSelectedItem()};
         model.createBooking(newBookingStr);        
     }
 }
@@ -108,7 +108,7 @@ class CheckInGuestCommand implements Command {
     @Override
     public void execute() {
         System.out.println("Checking in Guest....");
-        String bookingID = view.bookingIDtxf1.getText();
+        String bookingID = view.manageBookingsPanelMgr.bookingIDtxf1.getText();
         //Find the booking details for that Booking ID
         model.checkINGuest(bookingID);           
     }
@@ -128,7 +128,7 @@ class ConfirmCheckInCommand implements Command {
         System.out.println("Confirming check in...");
         //flag for checkinconfirmed
         model.data.setCheckInConfirmed(true);
-        String bookingID = view.bookingIDtxf1.getText();
+        String bookingID = view.manageBookingsPanelMgr.bookingIDtxf1.getText();
         model.checkINGuest(bookingID);  
     }
 }
@@ -145,7 +145,7 @@ class CheckOutGuestCommand implements Command {
     @Override
     public void execute() {
         System.out.println("Checking Out Guest....");
-        String bookingID2 = view.bookingIDtxf2.getText();
+        String bookingID2 = view.manageBookingsPanelMgr.bookingIDtxf2.getText();
         model.checkOUTGuest(bookingID2);        
     }
 }
@@ -163,7 +163,7 @@ class ConfirmCheckOutCommand implements Command {
     public void execute() {
         System.out.println("Confirming check out...");
         model.data.setCheckOutFlag(true);
-        String bookingID = view.bookingIDtxf2.getText();
+        String bookingID = view.manageBookingsPanelMgr.bookingIDtxf2.getText();
         model.checkOUTGuest(bookingID);        
     }
 }
@@ -179,7 +179,7 @@ class ComboBoxChangedCommand implements Command {
     
     @Override
     public void execute() {
-        String filter = (String) view.bookingsFilterOptions.getSelectedItem();
+        String filter = (String) view.manageBookingsPanelMgr.bookingsFilterOptions.getSelectedItem();
         model.data.tableBookingsFilter = filter;
         filter = (String) view.manageGuestsPanelMgr.guestsFilterOptions.getSelectedItem();
         model.data.tableGuestsFilter = filter;
@@ -201,7 +201,7 @@ class CancelBookingCommand implements Command {
     @Override
     public void execute() {
         System.out.println("Cancelling booking...");
-        String bookingID = view.bookingIDtxf3.getText();
+        String bookingID = view.manageBookingsPanelMgr.bookingIDtxf3.getText();
         model.cancelBooking(bookingID);        
     }
 }
@@ -219,7 +219,7 @@ class ConfirmCancellationCommand implements Command {
     public void execute() {
         System.out.println("Confirming cancellation...");
         model.data.setCancelBookingFlag(true);
-        String bookingID = view.bookingIDtxf3.getText();
+        String bookingID = view.manageBookingsPanelMgr.bookingIDtxf3.getText();
         model.cancelBooking(bookingID);        
     }
 }
