@@ -181,9 +181,9 @@ class ComboBoxChangedCommand implements Command {
     public void execute() {
         String filter = (String) view.bookingsFilterOptions.getSelectedItem();
         model.data.tableBookingsFilter = filter;
-        filter = (String) view.guestsFilterOptions.getSelectedItem();
+        filter = (String) view.manageGuestsPanelMgr.guestsFilterOptions.getSelectedItem();
         model.data.tableGuestsFilter = filter;
-        filter = (String) view.roomsFilterOptions.getSelectedItem();
+        filter = (String) view.manageRoomsPanelMgr.roomsFilterOptions.getSelectedItem();
         model.data.tableRoomsFilter = filter;
         model.fetchData();
     }
@@ -236,7 +236,7 @@ class CleanRoomCommand implements Command {
     @Override
     public void execute() {
         System.out.println("Setting room as cleaned...");
-        String roomNumber = view.roomNumbertxfRF.getText();
+        String roomNumber = view.manageRoomsPanelMgr.roomNumbertxfRF.getText();
         model.cleanRoom(roomNumber);        
     }
 }
@@ -252,7 +252,7 @@ class FindRoomCommand implements Command {
     
     @Override
     public void execute() {
-        String roomNumber = view.roomNumbertxfRF2.getText();
+        String roomNumber = view.manageRoomsPanelMgr.roomNumbertxfRF2.getText();
         model.fetchRoomStatus(roomNumber);        
     }
 }
@@ -268,10 +268,10 @@ class SetRoomStatusCommand implements Command {
     
     @Override
     public void execute() {
-        if (view.availableRB.isSelected())
-            model.setRoomStatus(view.roomNumbertxfRF2.getText(), 0);                    
-        else if (view.OOORBtn.isSelected())
-            model.setRoomStatus(view.roomNumbertxfRF2.getText(), 4);
+        if (view.manageRoomsPanelMgr.availableRB.isSelected())
+            model.setRoomStatus(view.manageRoomsPanelMgr.roomNumbertxfRF2.getText(), 0);                    
+        else if (view.manageRoomsPanelMgr.OOORBtn.isSelected())
+            model.setRoomStatus(view.manageRoomsPanelMgr.roomNumbertxfRF2.getText(), 4);
     }
 }
 
@@ -286,13 +286,13 @@ class MyBookingsFilterOptionsCommand implements Command {
     
     @Override
     public void execute() {
-        String myBookingsFilter = (String) view.myBookingsFilter.getSelectedItem();
+        String myBookingsFilter = (String) view.myBookingPanelMgr.myBookingsFilter.getSelectedItem();
         model.data.listMyBookingsFilter = myBookingsFilter;
         model.fetchGuestUserData();
         if ("Pending Requests".equals(myBookingsFilter)) 
-            view.leftPanelBOTTOMbtn.setText("View Request");
+            view.myBookingPanelMgr.leftPanelBOTTOMbtn.setText("View Request");
         else 
-            view.leftPanelBOTTOMbtn.setText("View Booking");        
+            view.myBookingPanelMgr.leftPanelBOTTOMbtn.setText("View Booking");        
     }
 }
 
@@ -307,7 +307,7 @@ class ViewBookingCommand implements Command {
     
     @Override
     public void execute() {
-        model.fetchMyBookingDetails(view.myBookingsList.getSelectedValue());
+        model.fetchMyBookingDetails(view.myBookingPanelMgr.myBookingsList.getSelectedValue());
     }
 }
 
@@ -322,7 +322,7 @@ class ViewRequestCommand implements Command {
     
     @Override
     public void execute() {
-        model.fetchMyRequestDetails(view.myBookingsList.getSelectedValue());
+        model.fetchMyRequestDetails(view.myBookingPanelMgr.myBookingsList.getSelectedValue());
     }
 }
 
