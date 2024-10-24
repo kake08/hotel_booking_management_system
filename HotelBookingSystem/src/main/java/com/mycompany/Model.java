@@ -244,28 +244,7 @@ public class Model {
         }        
         notifyListener();
     }
- 
-    //This method has been omitted as the guest request feature has been omitted for now
-    public void houseKeepRoom(String roomNumber) {
-//        int roomNumberInt; 
-//        try {
-//            roomNumberInt = Integer.parseInt(roomNumber);
-//            
-//        }catch(NumberFormatException e) {
-//            System.out.println("Error converting String to integer in cleanRoom in Model.java" + e.getMessage());
-//            listener.housekeepFeedbackMSG(-1);
-//            return;
-//        }
-//        
-//        boolean isCleaned = db.cleanRoom(roomNumberInt);
-//        if (isCleaned) { //Success cleaning message
-//            listener.housekeepFeedbackMSG(0);
-//        } else { //Room does not need cleaning
-//            listener.housekeepFeedbackMSG(1);
-//        }
-//        fetchData();
-    }
-    
+     
     //This method cleans a room that's been Checked out by taking a user's inputted valid room number, passing it to database for update
     //Room will be set as available, and display for user will be updated
     public void cleanRoom (String roomNumber) {

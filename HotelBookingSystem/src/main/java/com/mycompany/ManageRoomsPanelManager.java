@@ -28,6 +28,7 @@ import javax.swing.JTextField;
  * @author DeanK
  */
 public class ManageRoomsPanelManager {
+    public JPanel leftPanel3btnTOP;
     public JPanel leftPanel3btnCENTER;
     public JPanel leftPanel3MessageBOTTOM;
     public CardLayout roomFormCards;
@@ -57,13 +58,26 @@ public class ManageRoomsPanelManager {
     }
     
     public void loadManageRooms(JPanel tabPanel3) {
-        tabPanel3.setLayout(new BorderLayout());
-        
+        tabPanel3.setLayout(new BorderLayout());       
         //Panel for Left side of Manage Rooms for menu
+        JPanel leftPanel3 = createLeftPanel();     
+        loadRoomForms();
+        createLeftPanelButtons();       
+        createRightPanelTable();               
+        //Adding Table to scrollPane
+        JScrollPane sp1 = new JScrollPane(leftPanel3);
+        JScrollPane sp2 = new JScrollPane(roomsTable);        
+        JSplitPane tabPanel3Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
+        //Where the splitpane is located along the middle of two panes
+        tabPanel3Inner.setResizeWeight(.5d); 
+        tabPanel3.add(tabPanel3Inner, BorderLayout.CENTER);
+    }
+    
+    private JPanel createLeftPanel() {
         JPanel leftPanel3 = new JPanel();
         leftPanel3.setLayout(new BorderLayout());
         
-        JPanel leftPanel3btnTOP = new JPanel();
+        leftPanel3btnTOP = new JPanel();
         leftPanel3btnTOP.setLayout(new GridLayout(2,2));
         leftPanel3btnCENTER = new JPanel();
         leftPanel3btnCENTER.setLayout(roomFormCards); 
@@ -75,8 +89,10 @@ public class ManageRoomsPanelManager {
         leftPanel3.add(leftPanel3btnTOP, BorderLayout.NORTH);
         leftPanel3.add(leftPanel3btnCENTER, BorderLayout.CENTER);
         leftPanel3.add(leftPanel3MessageBOTTOM, BorderLayout.SOUTH);
-        loadRoomForms();
-        
+        return leftPanel3;
+    }
+    
+    private void createLeftPanelButtons() {
         //Adding JCOMBOBOX to left splitpane, North border
         JLabel northBtnTitle3 = new JLabel("Filter Rooms: ");
         String[] strFilterOptions = new String[]{"All Rooms", "Available Rooms", "N/A Rooms", 
@@ -88,6 +104,19 @@ public class ManageRoomsPanelManager {
                
         //Adding buttons to left splitpane, TOP border for options
         JButton cleanRoombtn = new JButton("Clean Room");
+        addActionListenercleanRoomBtn(cleanRoombtn);        
+        JButton OOObtn = new JButton("Out of Order");
+        addActionListenerOOObtn(OOObtn);
+        
+        leftPanel3btnTOP.add(cleanRoombtn);
+        leftPanel3btnTOP.add(OOObtn);
+        
+        // Adding label for user feedback to left split pane, bottom border
+        manageRoomMSG = new JLabel("");
+        leftPanel3MessageBOTTOM.add(manageRoomMSG);
+    }
+    
+    private void addActionListenercleanRoomBtn(JButton cleanRoombtn) {
         cleanRoombtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -102,8 +131,9 @@ public class ManageRoomsPanelManager {
                 roomFormMode = 1;
             }
         });
-        
-        JButton OOObtn = new JButton("Out of Order");
+    }
+    
+    private void addActionListenerOOObtn(JButton OOObtn) {
         OOObtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -118,42 +148,34 @@ public class ManageRoomsPanelManager {
                 roomFormMode = 2;
             }
         });
-        
-        leftPanel3btnTOP.add(cleanRoombtn);
-        leftPanel3btnTOP.add(OOObtn);
-        
-        // Adding label for user feedback to left split pane, bottom border
-        manageRoomMSG = new JLabel("");
-        leftPanel3MessageBOTTOM.add(manageRoomMSG);
-        
-        //Initializing table model which reflects booking records
-            tableModelRooms = new MyTableModel();
-            roomsTable = new JTable(tableModelRooms){
-            public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
-            return false;
-         }
-        };
-        
-        
-        //Adding Table to scrollPane
-        JScrollPane sp1 = new JScrollPane(leftPanel3);
-        JScrollPane sp2 = new JScrollPane(roomsTable);        
-        JSplitPane tabPanel3Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
-        //Where the splitpane is located along the middle of two panes
-        tabPanel3Inner.setResizeWeight(.5d); 
-        tabPanel3.add(tabPanel3Inner, BorderLayout.CENTER);
     }
-    
+        
+    private void createRightPanelTable() {
+        //Initializing table model which reflects booking records
+        tableModelRooms = new MyTableModel();
+        roomsTable = new JTable(tableModelRooms){
+            public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
+                return false;
+            }
+        }; 
+    }     
     
     private void loadRoomForms() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
-        
         //1.Empty Panel
         JPanel clearForm = new JPanel();
-        leftPanel3btnCENTER.add(clearForm, "CLEARFORM");
-        
+        leftPanel3btnCENTER.add(clearForm, "CLEARFORM");       
         //2.Clean Room form
+        createCleanRoomForm(gbc);        
+        //3. Out of Order Form
+        createOOOForm(gbc);
+        //4.Confirm status change Form
+        createOOOForm2(gbc);               
+        roomFormCards.show(leftPanel3btnCENTER, "CLEARFORM");      
+    }
+    
+    private void createCleanRoomForm(GridBagConstraints gbc) {
         JPanel cleanRoomForm = new JPanel();
         cleanRoomForm.setLayout(new GridBagLayout());
         JLabel cleanRoomLbl = new JLabel("Set Room as Cleaned: ");
@@ -184,8 +206,9 @@ public class ManageRoomsPanelManager {
         gbc.gridx = 1; gbc.gridy = 3;
         cleanRoomForm.add(clearBtnRF1, gbc);
         leftPanel3btnCENTER.add(cleanRoomForm, "CLEANROOMFORM");
-        
-        //3. Out of Order Form
+    }
+    
+    private void createOOOForm(GridBagConstraints gbc) {
         JPanel OOOForm = new JPanel();
         OOOForm.setLayout(new GridBagLayout());
         JLabel OOOLbl = new JLabel("Update Room Status: ");
@@ -215,7 +238,9 @@ public class ManageRoomsPanelManager {
         gbc.gridx = 1; gbc.gridy = 3;
         OOOForm.add(clearBtnRF2, gbc);
         leftPanel3btnCENTER.add(OOOForm, "OOOFORM");
-        
+    }
+    
+    private void createOOOForm2(GridBagConstraints gbc) {
         JPanel OOOForm2 = new JPanel();
         OOOForm2.setLayout(new GridBagLayout());
         OOOLbl2 = new JLabel("Select Status for Room __ : ");
@@ -244,11 +269,8 @@ public class ManageRoomsPanelManager {
         gbc.gridx = 1; gbc.gridy = 3;
         OOOForm2.add(cancelsetRoomStatusBtn, gbc);
         leftPanel3btnCENTER.add(OOOForm2, "OOOFORM2");
-                
-        roomFormCards.show(leftPanel3btnCENTER, "CLEARFORM");
-        
     }
-    
+        
     public void cleanRoomFeedbackMSG(int output) {
         if (output == -1) {
             manageRoomMSG.setText("Please enter a valid Room Number that needs cleaning");           

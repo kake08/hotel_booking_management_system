@@ -37,8 +37,9 @@ public class ManageGuestsPanelManager {
     private int guestFormMode = -1; // Default mode - 1.Complete Request 2.Update Phone 3. Send Note
     private JTextField guestID2txf, oldPhoneNotxf, newPhoneNotxf;
     private JButton updatePhoneBtn;
-
-    
+    public JPanel leftPanel2btnTOP;
+    JPanel leftPanel2MessageBOTTOM;
+   
     public void addActionListener(ActionListener listener) {
         guestsFilterOptions.addActionListener(listener);
         updatePhoneBtn.addActionListener(listener);
@@ -51,25 +52,43 @@ public class ManageGuestsPanelManager {
     
     public void loadManageGuests(JPanel tabPanel2) {
         init();
-        tabPanel2.setLayout(new BorderLayout());
+        tabPanel2.setLayout(new BorderLayout());       
+        ////LEFT PANEL
+        JPanel leftPanel2 = createLeftPanel();
+        loadGuestForms();        
+        createLeftPanelButtons();       
+        //RIGHT PANEL
+        createRightPanelTable();        
         
-        //Left side of Manage Guests for menu
+        //Adding left and right panel to separate scrollPanes, then added to splitpane
+        JScrollPane sp1 = new JScrollPane(leftPanel2);
+        JScrollPane sp2 = new JScrollPane(guestsTable);        
+        JSplitPane tabPanel2Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
+        //Where the splitpane is located along the middle of two panes
+        tabPanel2Inner.setResizeWeight(.5d); 
+        tabPanel2.add(tabPanel2Inner, BorderLayout.CENTER);
+    }
+    
+    private JPanel createLeftPanel() {
         JPanel leftPanel2 = new JPanel();
         leftPanel2.setLayout(new BorderLayout());
         
-        JPanel leftPanel2btnTOP = new JPanel();
+        leftPanel2btnTOP = new JPanel();
         leftPanel2btnTOP.setLayout(new GridLayout(3,2)); //3 by 2 menu components
         leftPanel2btnCENTER = new JPanel();
         leftPanel2btnCENTER.setLayout(guestFormCards); //Setting as cards layout
-        JPanel leftPanel2MessageBOTTOM = new JPanel();
+        leftPanel2MessageBOTTOM = new JPanel();
         leftPanel2MessageBOTTOM.setLayout(new FlowLayout());
         
         //Adding Top and Center Panels into left split Panel
         leftPanel2.add(leftPanel2btnTOP, BorderLayout.NORTH);
         leftPanel2.add(leftPanel2btnCENTER, BorderLayout.CENTER);
         leftPanel2.add(leftPanel2MessageBOTTOM, BorderLayout.SOUTH);
-        loadGuestForms();
         
+        return leftPanel2;
+    }
+    
+    private void createLeftPanelButtons() {
         //Adding COMBOBOX to left splitpane, North Border
         JLabel northBtnTitle2 = new JLabel("Filter Guest: ");
         String[] strFilterOptions = new String[]{"All Guests", "Active Guests", "Inactive Guests", "Guests with Request"};
@@ -83,6 +102,18 @@ public class ManageGuestsPanelManager {
         
         //Adding buttons to left splitpane, TOP border for options
         JButton completeReq = new JButton("Complete Request");
+        addActionListenerCompleteReq(completeReq);
+        JButton updatePhone = new JButton("Update Phone");
+        addActionListenerUpdatePhone(updatePhone);     
+        JButton sendNote = new JButton("Send Note");
+        addActionListenerSendNote(sendNote);
+        
+        leftPanel2btnTOP.add(completeReq);
+//        leftPanel2btnTOP.add(updatePhone);
+        leftPanel2btnTOP.add(sendNote);
+    }
+    
+    private void addActionListenerCompleteReq(JButton completeReq) {
         completeReq.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,7 +129,9 @@ public class ManageGuestsPanelManager {
             }
 //            
         });
-        JButton updatePhone = new JButton("Update Phone");
+    }
+    
+    private void addActionListenerUpdatePhone (JButton updatePhone){
         updatePhone.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,8 +146,10 @@ public class ManageGuestsPanelManager {
                 ManageGuestMSG.setText("");
             }
 //            
-        });        
-        JButton sendNote = new JButton("Send Note");
+        });  
+    }
+    
+    private void addActionListenerSendNote(JButton sendNote) {
         sendNote.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -130,38 +165,39 @@ public class ManageGuestsPanelManager {
             }
 //            
         });
-        leftPanel2btnTOP.add(completeReq);
-//        leftPanel2btnTOP.add(updatePhone);
-        leftPanel2btnTOP.add(sendNote);
-        
+    }
+         
+    private void createRightPanelTable() {
         //Initializing Table model which reflects Guest records
-//        String[][] myStrList= new String[][] { {"Data1a", "Data1b", "Data1c"}, {"Data2a", "Data2b", "Data2c"}, {"Data3a","Data3b","Data3c"}};
-//        String[] tableHeadings = new String[] {"Guest", "Room Number", "Request"};
         tableModelGuests = new MyTableModel();
         guestsTable = new JTable(tableModelGuests){ 
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
          }
         };
-        
-        //Adding Table to scrollPane
-        JScrollPane sp1 = new JScrollPane(leftPanel2);
-        JScrollPane sp2 = new JScrollPane(guestsTable);        
-        JSplitPane tabPanel2Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
-        //Where the splitpane is located along the middle of two panes
-        tabPanel2Inner.setResizeWeight(.5d); 
-        tabPanel2.add(tabPanel2Inner, BorderLayout.CENTER);
     }
     
     private void loadGuestForms() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.WEST;       
+        //1.Empty Panel
+        createClearForm();       
+        //2.Complete Request Panel - initialize components
+        createCompleteReqForm(gbc);       
+        //3.Update Phone Panel 
+        createUpdatePhoneForm(gbc);       
+        //4.Send Note Panel
+        createSendNodeForm(gbc);   
+        guestFormCards.show(leftPanel2btnCENTER, "CLEARFORM");
         
-    //1.Empty Panel
+    }
+    
+    private void createClearForm() {
         JPanel clearForm = new JPanel();
         leftPanel2btnCENTER.add(clearForm, "CLEARFORM");
-        
-    //2.Complete Request Panel - initialize components
+    }
+    
+    private void createCompleteReqForm(GridBagConstraints gbc) {
         JPanel completeReqForm = new JPanel();
         completeReqForm.setLayout(new GridBagLayout());
         JLabel label1 = new JLabel("Enter Guest Request Details: ");
@@ -189,8 +225,9 @@ public class ManageGuestsPanelManager {
         gbc.gridx = 1; gbc.gridy = 3;
         completeReqForm.add(clearBtn1, gbc);
         leftPanel2btnCENTER.add(completeReqForm, "COMPLETEREQFORM");
-        
-    //3.Update Phone Panel 
+    }
+    
+    private void createUpdatePhoneForm(GridBagConstraints gbc) {
         JPanel updatePhoneForm = new JPanel();
         updatePhoneForm.setLayout(new GridBagLayout());
         JLabel label2 = new JLabel("Update Phone Number: ");
@@ -232,8 +269,9 @@ public class ManageGuestsPanelManager {
         gbc.gridx = 1; gbc.gridy = 5;
         updatePhoneForm.add(clearBtn2, gbc);
         leftPanel2btnCENTER.add(updatePhoneForm, "UPDATEPHONEFORM");
-        
-    //4.Send Note Panel
+    }
+    
+    private void createSendNodeForm(GridBagConstraints gbc){
         JPanel sendNoteForm = new JPanel();
         sendNoteForm.setLayout(new GridBagLayout());
         JLabel label3 = new JLabel("Send Note to Guest: ");
@@ -275,9 +313,5 @@ public class ManageGuestsPanelManager {
         gbc.gridx = 0; gbc.gridy = 7; gbc.gridheight = 1; gbc.gridwidth = 1;
         sendNoteForm.add(clearBtn3, gbc);
         leftPanel2btnCENTER.add(sendNoteForm, "SENDNOTEFORM");
-    
-        
-        guestFormCards.show(leftPanel2btnCENTER, "CLEARFORM");
-        
     }
 }

@@ -23,7 +23,7 @@ import javax.swing.JTextField;
  */
 public class ManageBookingsPanelManager {
     
-    
+    JPanel leftPanel1btnTOP;
     JPanel leftPanel1btnCENTER;//Contains Manage bookings forms
     JPanel leftPanel1MessageBOTTOM;
     CardLayout bookingFormCards;
@@ -51,15 +51,14 @@ public class ManageBookingsPanelManager {
     JLabel cancelBookingMSG;
     int bookingMode;//1.Create Booking, 2.CheckIn, 3. CheckOut, 4.CancelBooking
     
-//Booking Message components
+    //Booking Message components
     JLabel guestNameLabel;
     JLabel roomLabel;
     JLabel bookingNoLabel;
     String cardTypeCancelAction;
     
     Data data;
-    
-    
+       
     
     public ManageBookingsPanelManager(Data data) {
         this.data = data;
@@ -67,8 +66,7 @@ public class ManageBookingsPanelManager {
         bookingMSGCards = new CardLayout();
         bookingMode = -1; 
     }
-    
-    
+        
     public void addActionListener(ActionListener listener) {
         createBookingBtn.addActionListener(listener);
         submitbtn1.addActionListener(listener);
@@ -81,13 +79,30 @@ public class ManageBookingsPanelManager {
     
     public void loadManageBookings(JPanel tabPanel1) {
         tabPanel1.setLayout(new BorderLayout());
-
         //Manage bookings menu on LEFT
+        JPanel leftPanel1 = createLeftPanel();
+        //Load Booking forms
+        loadBookingForms();        
+        //Loading buttons and components to left split pane
+       createLeftPanelButtons();               
+        //Create table on right panel
+        createRightPanelTable();
+     
+        //Adding Table to scrollPane
+        JScrollPane sp1 = new JScrollPane(leftPanel1);
+        JScrollPane sp2 = new JScrollPane(bookingsTable);        
+        JSplitPane tabPanel1Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
+        //Where the splitpane is located along the middle of two panes
+        tabPanel1Inner.setResizeWeight(.5d); 
+        tabPanel1.add(tabPanel1Inner, BorderLayout.CENTER);
+    }
+    
+    private JPanel createLeftPanel() {
         JPanel leftPanel1 = new JPanel();
         leftPanel1.setLayout(new BorderLayout());
         
         //Initialize and add containers for the leftPanel
-        JPanel leftPanel1btnTOP = new JPanel();
+        leftPanel1btnTOP = new JPanel();
         leftPanel1btnTOP.setLayout(new GridLayout(3,2));
         leftPanel1btnCENTER = new JPanel();
         leftPanel1btnCENTER.setLayout(bookingFormCards);
@@ -99,10 +114,12 @@ public class ManageBookingsPanelManager {
         leftPanel1.add(leftPanel1btnTOP, BorderLayout.NORTH);
         leftPanel1.add(leftPanel1btnCENTER, BorderLayout.CENTER);
         leftPanel1.add(leftPanel1MessageBOTTOM, BorderLayout.SOUTH);
-        loadBookingForms();
         
-        
-        //Adding buttons to left splitpane, North border
+        return leftPanel1;
+    }
+    
+    public void createLeftPanelButtons() {
+         //Adding buttons to left splitpane, North border
         JLabel northBtnTitle1 = new JLabel("Filter Booking List:");
         String[] strFilterOptions = new String[]{ "All Bookings", "Active Bookings", "Pending Bookings", "Historical Bookings"};
         bookingsFilterOptions = new JComboBox<String>(strFilterOptions);
@@ -110,8 +127,27 @@ public class ManageBookingsPanelManager {
         leftPanel1btnTOP.add(northBtnTitle1);
         leftPanel1btnTOP.add(bookingsFilterOptions);
         
-        //Adding buttons to left splitpane, CENTRAL border
+        //Creating buttons for left splitpane, CENTRAL border and adding actionlistener
         JButton makeBookingbtn = new JButton("Create Booking");
+        addActionListenermakeBookingBtn(makeBookingbtn);
+
+        JButton checkInBtn = new JButton("Check In");   
+        addActionListenerCheckInBtn(checkInBtn);
+
+        JButton checkOutBtn = new JButton("Check Out");
+        addActionListenerCheckOutBtn(checkOutBtn);
+        
+        JButton cancelBtn = new JButton("Cancel Booking");
+        addActionListenerCancelBtn(cancelBtn);
+
+        //Adding buttons to panel
+        leftPanel1btnTOP.add(makeBookingbtn);
+        leftPanel1btnTOP.add(checkInBtn);
+        leftPanel1btnTOP.add(checkOutBtn);
+        leftPanel1btnTOP.add(cancelBtn);
+    }
+    
+    private void addActionListenermakeBookingBtn(JButton makeBookingbtn) {
         makeBookingbtn.addActionListener(new ActionListener() {          
             @Override
             public void actionPerformed(ActionEvent e) {  
@@ -126,7 +162,9 @@ public class ManageBookingsPanelManager {
                 bookingMode = 1;
             }
         });
-        JButton checkInBtn = new JButton("Check In");   
+    }
+    
+    private void addActionListenerCheckInBtn(JButton checkInBtn) {
         checkInBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -140,9 +178,11 @@ public class ManageBookingsPanelManager {
                 bookingMSGCards.show(leftPanel1MessageBOTTOM, "EMPTYMSG"); 
                 bookingMode = 2;
             }
-            
+
         });
-        JButton checkOutBtn = new JButton("Check Out");
+    }
+    
+    private void addActionListenerCheckOutBtn(JButton checkOutBtn){
         checkOutBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -157,7 +197,9 @@ public class ManageBookingsPanelManager {
                 bookingMode = 3;
             }
         });
-        JButton cancelBtn = new JButton("Cancel Booking");
+    }
+    
+    private void addActionListenerCancelBtn(JButton cancelBtn){
         cancelBtn.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -173,38 +215,46 @@ public class ManageBookingsPanelManager {
             }
             
         });
-        leftPanel1btnTOP.add(makeBookingbtn);
-        leftPanel1btnTOP.add(checkInBtn);
-        leftPanel1btnTOP.add(checkOutBtn);
-        leftPanel1btnTOP.add(cancelBtn);
-               
+    }
+      
+    private void createRightPanelTable() {
         //Initializing Table model which reflects Booking records
         tableModelBookings = new MyTableModel();
         bookingsTable = new JTable(tableModelBookings){
             public boolean editCellAt(int row, int column, java.util.EventObject e) { //Prevents editing of cells in table = https://rb.gy/1qflxh
             return false;
          }
-        };
-        
-        
-        //Adding Table to scrollPane
-        JScrollPane sp1 = new JScrollPane(leftPanel1);
-        JScrollPane sp2 = new JScrollPane(bookingsTable);        
-        JSplitPane tabPanel1Inner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sp1, sp2);
-        //Where the splitpane is located along the middle of two panes
-        tabPanel1Inner.setResizeWeight(.5d); 
-        tabPanel1.add(tabPanel1Inner, BorderLayout.CENTER);
+        };      
+
     }
     
-        //Loads the booking form for user input in order to add, or manipulate the data.
+    //Loads the booking form for user input in order to add, or manipulate the data.
     private void loadBookingForms() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.WEST;      
         //1.EMPTY panel
+        createEmptyForm(); //No GBC required as no components to add       
+        //2.BOOKING panel - initialize components
+        createNewBookingForm(gbc);
+        //3.CHECK IN panel - initialize components
+        createCheckInForm(gbc);             
+        //4.CHECK OUT panel - initialize components
+        createCheckOutForm(gbc);                
+        //5.CANCEL panel - initialize components
+        createCancelForm(gbc);     
+        //Create the form that confirms found matching booking details with booking ID from database 
+        //and ask to confirm with user before proceeding
+        loadConfirmMatchMethod();             
+        //Finally, show the CLEAR card on start up.
+        bookingFormCards.show(leftPanel1btnCENTER, "CLEARFORM");     
+    }
+    
+    private void createEmptyForm() {
         JPanel clearForm = new JPanel();
         leftPanel1btnCENTER.add(clearForm, "CLEARFORM");
-        
-        //2.BOOKING panel - initialize components
+    }
+    
+    private void createNewBookingForm(GridBagConstraints gbc) {
         JPanel createForm = new JPanel();
         createForm.setLayout(new GridBagLayout());
 
@@ -249,8 +299,9 @@ public class ManageBookingsPanelManager {
         createForm.add(clearBtn, gbc);
         //Adding form to the Panel with cards layout
         leftPanel1btnCENTER.add(createForm, "CREATEFORM");
-        
-        //3.CHECK IN panel - initialize components
+    }
+    
+    private void createCheckInForm(GridBagConstraints gbc) {
         JPanel checkinForm = new JPanel();
         checkinForm.setLayout(new GridBagLayout());
         JLabel label2 = new JLabel("Check In Guest: ");
@@ -281,9 +332,9 @@ public class ManageBookingsPanelManager {
         checkinForm.add(clearBtn1, gbc);
         //Adding form to the panel with cards layout
         leftPanel1btnCENTER.add(checkinForm, "CHECKINFORM");
-        
-        
-        //4.CHECK OUT panel - initialize components
+    }
+    
+    private void createCheckOutForm(GridBagConstraints gbc) {
         JPanel checkoutForm = new JPanel();
         checkoutForm.setLayout(new GridBagLayout());
         
@@ -313,10 +364,9 @@ public class ManageBookingsPanelManager {
         checkoutForm.add(clearBtn2, gbc);
         //Adding Checkout form panel with the Cards Layout
         leftPanel1btnCENTER.add(checkoutForm, "CHECKOUTFORM");
-        
-
-        
-        //5.CANCEL panel - initialize components
+    }
+    
+    private void createCancelForm(GridBagConstraints gbc) {
         JPanel cancelForm = new JPanel();
         cancelForm.setLayout(new GridBagLayout());
         JLabel label4 = new JLabel("Cancel a Booking: ");
@@ -345,17 +395,6 @@ public class ManageBookingsPanelManager {
         cancelForm.add(clearBtn3, gbc);
         //Adding Cancel form to panel with the Cards Layout
         leftPanel1btnCENTER.add(cancelForm, "CANCELFORM");
-        
-        
-        //Create the form that confirms found matching booking details with booking ID from database 
-        //and ask to confirm with user before proceeding
-        loadConfirmMatchMethod();
-        
-        
-        
-        //Finally, show the CLEAR card on start up.
-        bookingFormCards.show(leftPanel1btnCENTER, "CLEARFORM");
-       
     }
     
     //Create the form that confirms found matching booking details with booking ID from database 

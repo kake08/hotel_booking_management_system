@@ -18,7 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
@@ -27,56 +26,36 @@ import javax.swing.border.TitledBorder;
  * @author DeanK
  */
 public class View extends JFrame implements ModelListener{
- 
-
-
-    
-    
+     //Panels
     JPanel mainPanel;
     JPanel loginPanel;
     JPanel startPanel;
     JPanel staffMenuPanel;
     JPanel guestMenuPanel;
     CardLayout cards;
-
-   
-    
-    //JPanels
-    JPanel tabPanel1; //Staff bookings panel
-    
     //Buttons
     JButton continueButton;
     JButton loginButton;
     JButton btnLogout1; //guest
     JButton btnLogout2; //staff
-    
-    
     JComboBox<String> userComboBox;
-
     //Labels
     JLabel loginMessage;
-    JLabel labelPW;    
-    
+    JLabel labelPW;       
     //Textbox or Typing fields
     JTextField username;
     JPasswordField password ;
-
-    
     //Data
     Data data = new Data();
-    
-    
+    //Panel Manager
     MyBookingPanelManager myBookingPanelMgr;
     ManageBookingsPanelManager manageBookingsPanelMgr;
     ManageGuestsPanelManager manageGuestsPanelMgr;
     ManageRoomsPanelManager manageRoomsPanelMgr;
     
-    //Constructor
     public View() {
-
         init();
-        loadLogin();
-        
+        loadLogin();       
         manageBookingsPanelMgr = new ManageBookingsPanelManager(data);
         manageGuestsPanelMgr = new ManageGuestsPanelManager();
         manageRoomsPanelMgr = new ManageRoomsPanelManager();        
@@ -87,25 +66,19 @@ public class View extends JFrame implements ModelListener{
         
         cards.show(mainPanel, "STARTPANEL");
         this.add(mainPanel);
-        setVisible(true);
-        
+        setVisible(true);   
     }
     
     //For communication with the Controller.java
-    public void addActionListener(ActionListener listener) {
-        
-        
+    public void addActionListener(ActionListener listener) {       
         this.continueButton.addActionListener(listener);
         this.loginButton.addActionListener(listener);
         this.btnLogout1.addActionListener(listener);
-        this.btnLogout2.addActionListener(listener);    
-        
+        this.btnLogout2.addActionListener(listener);          
         myBookingPanelMgr.addActionListener(listener);
         manageBookingsPanelMgr.addActionListener(listener);
         manageRoomsPanelMgr.addActionListener(listener);
-        manageGuestsPanelMgr.addActionListener(listener);
-
-        
+        manageGuestsPanelMgr.addActionListener(listener);     
     }
      
     //initializes frame 
@@ -120,9 +93,6 @@ public class View extends JFrame implements ModelListener{
         mainPanel.setBorder(new TitledBorder("Hotel Booking System - MAIN PANEL"));
         cards = new CardLayout();
         mainPanel.setLayout(cards);
-        
-        
-        
         
         //Start Up Panel
         startPanel = new JPanel();
@@ -148,8 +118,7 @@ public class View extends JFrame implements ModelListener{
         userOptionComponents.add(continueButton, gbc);
         
         startPanel.add(userOptionComponents, BorderLayout.CENTER);
-        mainPanel.add(startPanel, "STARTPANEL");
-       
+        mainPanel.add(startPanel, "STARTPANEL");      
     }
     
     //Loads starting frame - user Login menu
@@ -247,7 +216,7 @@ public class View extends JFrame implements ModelListener{
         //TabbedPane has tabPanel1, tabPanel2, tabPanel3
         JTabbedPane menuComponents = new JTabbedPane();
         //MANAGE BOOKINGS
-        tabPanel1 = new JPanel();               
+        JPanel tabPanel1 = new JPanel();               
         //MANAGE GUESTS
         JPanel tabPanel2 = new JPanel();
         //MANAGE ROOMS
@@ -297,8 +266,7 @@ public class View extends JFrame implements ModelListener{
     private void loadMyBookingsPanel(JPanel myBookingsPanel) {
         myBookingPanelMgr.loadMyBookingsPanel(myBookingsPanel);
     }
-
-    
+ 
     @Override
     public void createBookingFeedbackMSG(int output) {
         manageBookingsPanelMgr.createBookingFeedbackMSG(output);
@@ -336,14 +304,13 @@ public class View extends JFrame implements ModelListener{
             this.username.setText("");
             this.password.setText("");
             this.loginMessage.setText("Invalid username or password. Try Again.");
-        } else { //SHOW THE MENU PANEL -'reload' all the tables as data has been updated
+        } else { 
             this.username.setText("");
             this.password.setText("");
             this.loginMessage.setText("");
             if (data.userMode == 0) //guest
             {
                 cards.show(mainPanel, "GUESTMENUPANEL");
-//                mainPanel.setBorder(new TitledBorder("Hotel Booking System - MAIN PANEL"));
                 mainPanel.setBorder(new TitledBorder("You are logged in as " + data.currentloggeduser));
                 
             }
@@ -357,22 +324,12 @@ public class View extends JFrame implements ModelListener{
                     confirmCheckIn(data);
                 }
             }
-        }
-        
-        
+        }      
     }
         
     private void confirmCheckIn(Data data) {
         manageBookingsPanelMgr.confirmCheckIn(data);
     }
-    
-//    private void confirmCheckOut(Data data) {
-//        manageBookingsPanelMgr.confirmCheckOut(data);
-//    }
-//    
-//    private void confirmCancelBooking(Data data) {
-//        manageBookingsPanelMgr.confirmCancelBooking(data);
-//    }
     
     private String[] setManageBookingMSG(Data data){      
         return manageBookingsPanelMgr.setManageBookingMSG(data);
