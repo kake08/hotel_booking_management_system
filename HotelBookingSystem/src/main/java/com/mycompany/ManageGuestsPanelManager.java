@@ -204,6 +204,12 @@ public class ManageGuestsPanelManager {
         JLabel guestID = new JLabel("Guest ID: ");
         JTextField guestIDtxfGF = new JTextField(10);
         JButton checkRequestsBtn = new JButton("Check Requests"); //Finds requests, creates forms that allows completion of request
+        checkRequestsBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ManageGuestMSG.setText("Feature N/A: Work in progress...");
+            }
+        });
         JButton clearBtn1 = new JButton("Clear");
         clearBtn1.addActionListener(new ActionListener() {
             @Override
@@ -238,6 +244,12 @@ public class ManageGuestsPanelManager {
         JLabel newPhoneNo = new JLabel("New Phone Number: ");
         newPhoneNotxf = new JTextField(10);
         updatePhoneBtn = new JButton("Update Phone Number");
+        updatePhoneBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ManageGuestMSG.setText("Feature N/A: Work in progress...");
+            }
+        });
         JButton clearBtn2 = new JButton("Clear");
         clearBtn2.addActionListener(new ActionListener(){ 
             @Override
@@ -283,6 +295,12 @@ public class ManageGuestsPanelManager {
         JTextArea customNotetxf = new JTextArea(5,20);
         JScrollPane customNoteSP = new JScrollPane(customNotetxf);
         JButton sendNote = new JButton("Send Note");
+        sendNote.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ManageGuestMSG.setText("Feature N/A: Work in progress...");
+            }
+        });
         JButton clearBtn3 = new JButton("Clear");
         clearBtn3.addActionListener(new ActionListener(){
             @Override

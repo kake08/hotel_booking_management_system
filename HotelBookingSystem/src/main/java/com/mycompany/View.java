@@ -352,6 +352,7 @@ public class View extends JFrame implements ModelListener{
     }
     
     
+    //sets user mode - important for selecting which database to use for validating log in details
     public void setUserMode(int userMode) {
         if (userMode == 0) { //guest
             guestMenuPanel.setBorder(new TitledBorder("Guest Menu"));
