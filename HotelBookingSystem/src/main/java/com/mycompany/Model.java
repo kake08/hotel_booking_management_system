@@ -157,7 +157,7 @@ public class Model {
     }
      
     //This method Checks out a valid Occupied booking by taking its bookingID as parameter and passing it to database for update
-    public void checkOUTGuest (String bookingID) {
+    public void checkOUTGuest(String bookingID) {
         int bookingIDint;
         try {
             bookingIDint = Integer.parseInt(bookingID);
